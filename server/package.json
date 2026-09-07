@@ -1,0 +1,14 @@
+{
+  "name": "punxarmy-room-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Authoritative room server for punxarmy.com - zero dependencies",
+  "main": "room-server.js",
+  "scripts": {
+    "start": "node room-server.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,12 @@
+# render.com  ->  New + > Blueprint > point at this repo
+services:
+  - type: web
+    name: punxarmy-rooms
+    runtime: node
+    plan: free
+    buildCommand: ""          # nothing to build, nothing to install
+    startCommand: node room-server.js
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8080
