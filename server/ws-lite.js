@@ -159,8 +159,11 @@ class Socket {
  * Attach a WebSocket endpoint to an existing http.Server.
  * @param {import('http').Server} server
  * @param {(ws: Socket, req: import('http').IncomingMessage) => void} onConnection
+ * @param {(req: import('http').IncomingMessage) => string|null} [verify]
+ *        Runs before the handshake. Return null to allow, or an HTTP status
+ *        line ("429 Too Many Requests") to refuse without upgrading.
  */
-function attach(server, onConnection) {
+function attach(server, onConnection, verify) {
   server.on('upgrade', (req, sock, head) => {
     const key = req.headers['sec-websocket-key'];
     const ver = req.headers['sec-websocket-version'];
@@ -168,6 +171,18 @@ function attach(server, onConnection) {
         String(req.headers.upgrade || '').toLowerCase() !== 'websocket') {
       sock.write('HTTP/1.1 400 Bad Request\r\n\r\n');
       return sock.destroy();
+    }
+    /* Refuse BEFORE upgrading. A rejected client should not cost a handshake,
+       an upgraded socket, and a close frame - which is exactly the budget a
+       flood is trying to spend. `verify` returns null to allow, or an HTTP
+       status line to refuse with. */
+    if (verify) {
+      let deny;
+      try { deny = verify(req) } catch (e) { deny = '500 Internal Server Error' }
+      if (deny) {
+        sock.write('HTTP/1.1 ' + deny + '\r\nConnection: close\r\n\r\n');
+        return sock.destroy();
+      }
     }
     sock.write(
       'HTTP/1.1 101 Switching Protocols\r\n' +
