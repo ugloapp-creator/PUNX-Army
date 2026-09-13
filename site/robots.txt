@@ -1,0 +1,12 @@
+# punxarmy.com
+# Everything is public. There is no admin area, no login and no private path.
+
+User-agent: *
+Allow: /
+
+# Assets are referenced by the pages and should be crawlable so images can
+# appear in image search.
+Allow: /img/
+Allow: /og-image.jpg
+
+Sitemap: https://punxarmy.com/sitemap.xml
