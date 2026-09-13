@@ -1,0 +1,20 @@
+app = "punxarmy-rooms"
+primary_region = "atl"
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.http_options]
+    idle_timeout = 900
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout  = "5s"
+    method   = "GET"
+    path     = "/health"
