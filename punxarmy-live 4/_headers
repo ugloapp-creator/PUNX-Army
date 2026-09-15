@@ -1,0 +1,85 @@
+# Security and caching headers for punxarmy.com
+#
+# Cloudflare Pages and Netlify both read this file verbatim. Vercel users:
+# see vercel.json, which carries the same set. Nginx/Caddy: the same header
+# names and values apply, in that server's own syntax.
+#
+# The CSP below is written against what the page ACTUALLY does. Read the
+# notes before loosening anything - each 'unsafe' below is there for a
+# specific reason and removing the reason should remove the exception.
+
+/*
+  # --- Content Security Policy -------------------------------------------
+  # script-src 'unsafe-inline': the whole app is one inline <script>. That is
+  #   the architecture (a single self-contained file), so inline script cannot
+  #   be forbidden. It is bounded instead: there is no eval, no new Function,
+  #   no dynamic script injection anywhere in the build, and every value that
+  #   reaches the DOM is either textContent or run through esc()/mark().
+  #   If you ever split the app into external files, drop 'unsafe-inline'.
+  # connect-src: Wix for the shop catalogue and checkout, and your own room
+  #   server. Nothing else may be contacted. Add your room host here if it is
+  #   not rooms.punxarmy.com.
+  # img-src / media-src: images and the two mixes are now SEPARATE FILES on
+  #   this origin rather than data: URIs, so 'self' covers them. data: is kept
+  #   only because the canvas renderers produce data URLs internally.
+  # frame-ancestors 'none': this page may not be framed by anyone, which is
+  #   what stops clickjacking. It supersedes X-Frame-Options in modern
+  #   browsers; the old header is kept below for old ones.
+  # form-action 'self': the roll sign-up posts back to this origin (Netlify
+  #   Forms). 'self' is the tightest value that still allows it - an injected
+  #   script still cannot exfiltrate by POSTing a form to somebody else's
+  #   server, which was the point of 'none'.
+  # base-uri 'none': stops an injected <base> from re-pointing relative URLs.
+  # object-src 'none': no Flash/Java/plugin surface at all.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: https://static.wixstatic.com; media-src 'self' data: blob:; connect-src 'self' https://www.wixapis.com wss://punx-army.fly.dev wss://rooms.punxarmy.com; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
+
+  # --- Transport ----------------------------------------------------------
+  # Two years, subdomains included. This is what enforces https: a browser
+  # that has seen this header once will refuse plain http for punxarmy.com
+  # and every subdomain until it expires. Only add "preload" once you are
+  # certain you will never want plain http on any punxarmy.com subdomain.
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+
+  # --- Everything else ----------------------------------------------------
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  # The page needs none of these. Denying them means an injected script
+  # cannot quietly reach for a camera or a location either.
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+# --- Caching ---------------------------------------------------------------
+# HTML is small now (~240 KB) and changes when you redeploy, so cache it
+# briefly and revalidate. Assets are content that never changes under the same
+# name, so they get a year and "immutable" - which is what makes the second
+# visit essentially instant.
+
+/index.html
+  Cache-Control: public, max-age=300, must-revalidate
+/releases/*
+  Cache-Control: public, max-age=300, must-revalidate
+/journal/*
+  Cache-Control: public, max-age=300, must-revalidate
+/rights/*
+  Cache-Control: public, max-age=300, must-revalidate
+
+/img/*
+  Cache-Control: public, max-age=31536000, immutable
+/audio/*
+  Cache-Control: public, max-age=31536000, immutable
+  Accept-Ranges: bytes
+/og-image.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/favicon.svg
+  Cache-Control: public, max-age=31536000, immutable
+/apple-touch-icon.png
+  Cache-Control: public, max-age=31536000, immutable
+
+# Crawlers should always get a fresh copy of these two.
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+  Content-Type: application/xml; charset=utf-8
+/robots.txt
+  Cache-Control: public, max-age=3600
