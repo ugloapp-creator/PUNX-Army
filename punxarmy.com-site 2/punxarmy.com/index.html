@@ -1398,8 +1398,11 @@ $('#dl').onclick=async()=>{if(!role||saving)return;saving=true;const name=`punx-
   const em=SF.elements.email.value.trim();SF.elements.email.value=em;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){SF.classList.add('bad');note.textContent='that address looks off. check it and try again.';SF.elements.email.focus();return}
   SF.classList.remove('bad');SF.dataset.busy=1;btn.disabled=true;btn.textContent='Sending…';
-  try{const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(SF)).toString()});
-    if(!r.ok)throw new Error('status '+r.status);
+  /* two copies: Kit (the mailing list) + Netlify Forms (backup record). either landing counts. */
+  const kit=fetch('https://app.kit.com/forms/10032015/subscriptions',{method:'POST',mode:'no-cors',body:new URLSearchParams({email_address:em})});
+  const nf=fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(SF)).toString()}).then(r=>{if(!r.ok)throw new Error('status '+r.status)});
+  try{const res=await Promise.allSettled([kit,nf]);
+    if(!res.some(x=>x.status==='fulfilled'))throw new Error('both failed');
     carry('mail','you’re on the frequency. the next drop comes straight to you.')}
   catch(err){note.textContent='the transmission didn’t go through. check your connection and try again.'}
   finally{delete SF.dataset.busy;btn.disabled=false;btn.textContent='Tune in'}});

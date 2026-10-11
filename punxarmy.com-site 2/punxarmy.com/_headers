@@ -16,8 +16,9 @@
   #   no dynamic script injection anywhere in the build, and every value that
   #   reaches the DOM is either textContent or run through esc()/mark().
   #   If you ever split the app into external files, drop 'unsafe-inline'.
-  # connect-src 'self': the page only fetches its own song file (to cut the
-  #   glimpses of it) and posts the email sign-up to this site. Nothing else.
+  # connect-src: the page fetches its own song file (to cut the glimpses of
+  #   it) and posts the email sign-up to this site (Netlify Forms backup) and
+  #   to Kit (app.kit.com, the mailing list). Nothing else.
   # img-src / media-src: every image, clip and the song are files on this
   #   origin. data: and blob: are kept because the Archive File is drawn on a
   #   canvas and handed to the visitor as an image.
@@ -28,7 +29,7 @@
   #   to this site (Netlify Forms). Nothing may submit a form anywhere else.
   # base-uri 'none': stops an injected <base> from re-pointing relative URLs.
   # object-src 'none': no Flash/Java/plugin surface at all.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://app.kit.com; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
 
   # --- Transport ----------------------------------------------------------
   # Two years, subdomains included. This is what enforces https: a browser
