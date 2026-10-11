@@ -1,0 +1,7 @@
+# punxarmy.com
+# Everything is public. There is no admin area, no login and no private path.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://punxarmy.com/sitemap.xml
