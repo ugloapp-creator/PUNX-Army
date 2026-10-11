@@ -83,3 +83,7 @@
   Content-Type: application/xml; charset=utf-8
 /robots.txt
   Cache-Control: public, max-age=3600
+
+# Personal code links are private doors: keep them out of search results.
+/t/*
+  X-Robots-Tag: noindex, nofollow

@@ -5,3 +5,7 @@
 /releases/*  /  301
 /army        /  301
 /army/*      /  301
+
+# Personal signal codes for invited creators: /t/<code> serves the initiation;
+# the page reads the code, logs it privately and tidies the address back to /.
+/t/*         /index.html  200

@@ -596,8 +596,9 @@ footer.small{margin-top:2.6rem;font-size:.66rem;letter-spacing:.14em;color:var(-
           <div class="carry3" id="carry3" role="group" aria-label="Carry the signal">
             <div class="c3-head"><span class="k">carry the signal</span><span class="ct" id="c3count">0 / 3 carried</span></div>
             <button class="b3 chrome c3 primary" id="dl"><span class="num">01</span><span class="txt"><b>Save &amp; share your Archive File</b><small>post it and tag @yesop_</small></span><span class="ar">↗</span><span class="chk">CARRIED ✓</span></button>
+            <form name="code-visit" data-netlify="true" hidden><input type="hidden" name="form-name" value="code-visit"><input name="code"></form>
             <form class="c3 c3form" id="signal-form" name="transmission" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field" novalidate>
-              <input type="hidden" name="form-name" value="transmission"><input type="hidden" name="role" value=""><input type="hidden" name="file" value="">
+              <input type="hidden" name="form-name" value="transmission"><input type="hidden" name="role" value=""><input type="hidden" name="file" value=""><input type="hidden" name="code" value="">
               <p class="hp" aria-hidden="true"><label>Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
               <span class="num">02</span>
               <span class="txt"><b>Receive the next transmission</b><small>new drops and updates from yesop, straight to your inbox</small>
@@ -653,6 +654,14 @@ const fileNo=(()=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return '
 const today=new Date().toISOString().slice(0,10);
 function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+/* personal signal codes: punxarmy.com/t/<code> opens the initiation for one invited creator.
+   the code is kept on this device, logged once as a private visit, and travels with an email sign-up. */
+const signalCode=(()=>{const m=location.pathname.match(/^\/t\/([a-z0-9][a-z0-9_-]{0,31})\/?$/i);
+  if(m){const c=m[1].toLowerCase();store('punx_code',c);try{history.replaceState(null,'','/'+location.hash)}catch(e){}
+    if(!load('punx_code_seen_'+c)){store('punx_code_seen_'+c,'1');
+      fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({'form-name':'code-visit',code:c}).toString()}).catch(()=>{})}
+    return c}
+  return load('punx_code')||''})();
 /* pacing: one dial for the whole piece (1 = the intended slow pace) */
 const PACE=1;
 const wait=ms=>new Promise(r=>setTimeout(r,ms*PACE));
@@ -1393,13 +1402,13 @@ $('#dl').onclick=async()=>{if(!role||saving)return;saving=true;const name=`punx-
   catch(e){const a=document.createElement('a');a.download=name;a.href=$('#card').toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();carry('share','saved. post it and tag @yesop_')}
   finally{saving=false}};
 /* the transmission list: posted to Netlify Forms (form "transmission"); nothing else receives it */
-{const SF=$('#signal-form'),btn=SF.querySelector('.tx'),note=$('#c3note');
+{const SF=$('#signal-form'),btn=SF.querySelector('.tx'),note=$('#c3note');SF.elements.code.value=signalCode;
  SF.addEventListener('submit',async e=>{e.preventDefault();if(SF.dataset.busy)return;
   const em=SF.elements.email.value.trim();SF.elements.email.value=em;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){SF.classList.add('bad');note.textContent='that address looks off. check it and try again.';SF.elements.email.focus();return}
   SF.classList.remove('bad');SF.dataset.busy=1;btn.disabled=true;btn.textContent='Sending…';
   /* two copies: Kit (the mailing list) + Netlify Forms (backup record). either landing counts. */
-  const kit=fetch('https://app.kit.com/forms/10032015/subscriptions',{method:'POST',mode:'no-cors',body:new URLSearchParams({email_address:em})});
+  const kit=fetch('https://app.kit.com/forms/10032015/subscriptions',{method:'POST',mode:'no-cors',body:new URLSearchParams({email_address:em,'fields[signal_code]':signalCode,'fields[role]':SF.elements.role.value})});
   const nf=fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(SF)).toString()}).then(r=>{if(!r.ok)throw new Error('status '+r.status)});
   try{const res=await Promise.allSettled([kit,nf]);
     if(!res.some(x=>x.status==='fulfilled'))throw new Error('both failed');
