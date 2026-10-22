@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PUNX Passport | PUNX ARMY</title>
+<meta name="description" content="A free PUNX Passport: a record that you were here.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/casting/casting.css">
+<script src="/consent.js" defer></script>
+</head>
+<body>
+<header class="top"><a href="/">PUNX ARMY</a><span>PUNX Passport</span></header>
+<main class="wrap">
+  <section id="pp" class="hide">
+    <p class="kicker">PUNX PASSPORT</p>
+    <h1 class="display" id="ppid"></h1>
+    <p class="sub" id="pph"></p>
+    <p class="tiny" id="ppno"></p>
+    <p class="callout hide" id="pppath"></p>
+    <h2 style="margin-top:1.6rem">Your file</h2>
+    <ol class="track sm" id="pptrack" aria-label="Your file's status"><li><b>Signal sent</b><span class="def">submitted</span></li><li><b>Filed</b><span class="def">in review</span></li><li><b>Recalled</b><span class="def">callback</span></li><li><b>Founding File</b><span class="def">booked</span></li></ol>
+    <p class="quiet" id="ppstage"></p>
+    <h2>Your stamps</h2>
+    <div class="stamps" id="stamps"></div>
+    <div class="callout"><b>YOUR PASSPORT IS NOT A FOLLOW.</b><br>IT IS A RECORD THAT YOU WERE HERE, AND YOU ARE PART OF IT NOW.</div>
+    <p class="quiet"><b>THE ARCHIVE DOES NOT MEASURE HOW LOUD YOU ARE.</b> IT MEASURES WHAT YOU CARRY.</p>
+    <p class="quiet">Stamps are a record, not a score. They never affect contest judging.</p>
+    <h2>Connect it to Discord</h2>
+    <p>In the Casting Room, type <b>/passport</b> and paste <b id="ppcode"></b> as the code. Your Discord stamps and these become one Passport.</p>
+    <div class="row"><a class="btn" id="join" href="/room" target="_blank" rel="noopener">Join the Discord</a><a class="btn ghost" href="/casting/">The Casting Room</a></div>
+  </section>
+  <section id="state" class="hide">
+    <p class="kicker">PUNX PASSPORT</p>
+    <h1 class="display" id="st-h"></h1>
+    <p class="lead" id="st-p"></p>
+    <div class="row" style="margin-top:1.2rem"><a class="btn" href="/casting/">The Casting Room</a></div>
+  </section>
+  <footer class="bottom">
+    <nav aria-label="Site"><a href="/">The initiation</a><a href="/casting/">The Casting Room</a><a href="/casting/rules/">Official rules</a><a href="/rights/">Rights &amp; credits</a><a href="/privacy/">Privacy</a><a href="/privacy/#storage">Cookies &amp; storage</a><a href="/privacy/#choices" data-cookie-settings>Cookie settings</a><a href="/terms/">Terms</a></nav>
+    <p>PUNX ARMY is the campaign world of YESOP. No ads, nothing sold, and analytics cookies only if you say yes.</p>
+    <p>Not sponsored, endorsed or administered by, or associated with, Instagram, TikTok or Discord.</p>
+  </footer>
+</main>
+<script>
+(()=>{const $=s=>document.querySelector(s);
+const STAMPS={'00':'Initiated','01':'First entry','02':'Crew connected','03':'Featured','04':'Plus-one','05':'On stage','06':'Recalled','07':'Founding file'};
+const id=((location.pathname.match(/\/passport\/(pp-[a-z0-9]{6})\/?$/i)||[])[1]||'').toUpperCase();
+const show=(h,p)=>{$('#st-h').textContent=h;$('#st-p').textContent=p;$('#state').classList.remove('hide')};
+if(!id){show('No Passport here.','This link is missing its Passport number (it looks like PP-XXXXXX).');return}
+const ref=(()=>{try{return localStorage.getItem('punx_code')||''}catch(e){return ''}})();$('#join').href='/room'+(ref?'?ref='+encodeURIComponent(ref):'');
+fetch('/api/passport/'+id,{cache:'no-store'}).then(r=>r.json().then(j=>[r.status,j])).then(([s,j])=>{
+  if(s!==200){show('Passport not found.','Check the number on your entry confirmation. It looks like PP-XXXXXX.');return}
+  $('#ppid').textContent=j.id;$('#ppcode').textContent=j.id;$('#pph').textContent=j.handle?'@'+j.handle:'';{const L={"SELECTOR": "Every fit has a tempo.", "FORMMAKER": "Pieces on a floor. Then, somehow, you.", "MOTIONKEEPER": "Clothes were made to go somewhere.", "CITY SCRIBE": "Wear the street you came from.", "MEMORYKEEPER": "Some things are worn. Some things are kept.", "SIGNAL RELAY": "Nobody gets restored alone."};if(j.path&&L[j.path]){const e=$('#pppath');e.textContent='';const b=document.createElement('b');b.textContent='ENTERING AS: '+j.path;const i=document.createElement('i');i.textContent=L[j.path];e.append(b,document.createElement('br'),i);e.classList.remove('hide')}}if(j.no)$('#ppno').textContent='CAST NO. '+String(j.no).padStart(4,'0')+' · in the order people arrived, not a ranking';
+  const got={};(j.stamps||[]).forEach(s=>got[s.code]=s);
+  const box=$('#stamps');
+  for(const [k,n] of Object.entries(STAMPS)){const d=document.createElement('div');d.className='stamp'+(got[k]?' on':'');
+    const c=document.createElement('span');c.className='c';c.textContent=k;const nm=document.createElement('span');nm.className='nm';nm.textContent=n;
+    d.append(c,nm);if(got[k]){const t=document.createElement('span');t.className='d';t.textContent=new Date(got[k].ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});d.append(t)}
+    d.setAttribute('aria-label','Stamp '+k+', '+n+(got[k]?', earned':', not yet'));box.append(d)}
+  {const CLOSE=Date.parse('2026-11-12T04:59:59Z');const st=got['07']?4:got['06']?3:got['01']?(Date.now()>CLOSE?2:1):0;
+   const msg=['No file yet. Send your signal at punxarmy.com/casting and this Passport starts its record.','Signal sent. Your file is in the archive. The Reading Panel reads every file after entries close on Nov 11.','Filed. Your file is with the Reading Panel. Recalls go out Nov 13.','Recalled. The archive pulled your file back out: the Reading Panel wants a closer look. Watch your messages.','Founding File. You are the face of Archive 001. Welcome to The Restoration.'][st];
+   [...document.querySelectorAll('#pptrack li')].forEach((li,i)=>{li.classList.toggle('done',i<st-1);li.classList.toggle('now',i===st-1)});
+   $('#ppstage').textContent=msg}
+  $('#pp').classList.remove('hide');
+}).catch(()=>show('One moment.','The archive is waking up. Refresh in a minute.'));
+})();
+</script>
+</body>
+</html>
