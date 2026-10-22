@@ -17,7 +17,7 @@
    - punxTrack(name, params) sends a custom event only if analytics is on. */
 (() => {
   'use strict';
-  const GA_ID = 'G-XXXXXXXXXX'; // ← paste your Measurement ID here
+  const GA_ID = 'G-S1VJ9KL9R3'; // your GA4 Measurement ID
   const KEY = 'punx_consent', VERSION = 1, MAX_AGE = 365 * 864e5;
   const enabled = /^G-[A-Z0-9]{6,}$/.test(GA_ID) && GA_ID !== 'G-XXXXXXXXXX';
   const gpc = !!navigator.globalPrivacyControl;
