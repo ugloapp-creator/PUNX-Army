@@ -79,6 +79,10 @@
   font:700 .68rem "IBM Plex Mono","Courier New",monospace;letter-spacing:.16em;text-transform:uppercase;border:1px solid #6f706c;background:linear-gradient(#d8dad6,#a9aca8);color:#070707}
 .pcx button:hover{filter:brightness(1.07)}
 .pcx button:focus-visible{outline:2px solid #A6FF00;outline-offset:3px}
+.pcx-chip{all:unset;box-sizing:border-box;position:fixed;left:max(.6rem,env(safe-area-inset-left));bottom:max(.6rem,env(safe-area-inset-bottom));z-index:2147483000;cursor:pointer;
+  padding:.45rem .7rem;border:1px solid #3a3a38;border-left:3px solid #A6FF00;border-radius:4px;background:rgba(18,18,17,.92);color:#A39D91;
+  font:600 .58rem "IBM Plex Mono","Courier New",monospace;letter-spacing:.18em;text-transform:uppercase}
+.pcx-chip:hover{color:#E6E4DE}.pcx-chip:focus-visible{outline:2px solid #A6FF00;outline-offset:3px}
 @media (max-width:360px){.pcx .r{grid-template-columns:1fr}}
 @media (max-height:520px) and (min-width:600px){.pcx{display:grid;grid-template-columns:1fr 12rem;gap:.2rem 1rem;align-items:center;max-width:52rem;padding:.7rem .9rem}.pcx h2,.pcx p{grid-column:1;margin:0}.pcx .r{grid-column:2;grid-row:1/3;grid-template-columns:1fr;gap:.4rem}.pcx button{min-height:2.3rem}}`;
   function show() {
@@ -90,7 +94,24 @@
     box.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => choose(b.dataset.a)));
     document.body.appendChild(box);
   }
-  function hide() { if (box) { box.remove(); box = null; } }
+  function hide() { if (box) { box.remove(); box = null; } if (chip) { chip.remove(); chip = null; } }
+  // On the initiation, the popup must never sit on top of the story. Once the visitor presses Begin
+  // without answering, it folds into a small chip in the corner. No answer still means analytics stays off.
+  let chip = null;
+  function fold() {
+    if (!box || chip) return;
+    box.remove(); box = null;
+    chip = document.createElement('button'); chip.type = 'button'; chip.className = 'pcx-chip'; chip.textContent = 'Cookie choice';
+    chip.setAttribute('aria-label', 'Open the cookie choice');
+    chip.addEventListener('click', () => { chip.remove(); chip = null; show(); });
+    document.body.appendChild(chip);
+  }
+  function watchGate() {
+    const gate = document.getElementById('gate'); if (!gate) return;
+    const mo = new MutationObserver(() => { if (!document.getElementById('gate')) { mo.disconnect(); fold(); } });
+    mo.observe(document.body, { childList: true, subtree: true });
+    const b = document.getElementById('begin'); if (b) b.addEventListener('click', () => setTimeout(fold, 50));
+  }
 
   // ── "Cookie settings" links and the panel on /privacy ──
   function paintPanel() {
@@ -118,7 +139,7 @@
     if (p) storagePanel(p);
     const a = read();
     if (a === 'granted') load();
-    else if (enabled && !a && !gpc && !document.querySelector('[data-no-notice]')) show();
+    else if (enabled && !a && !gpc && !document.querySelector('[data-no-notice]')) { show(); watchGate(); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();

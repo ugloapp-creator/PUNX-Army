@@ -220,7 +220,9 @@ html.noise .transmission{background:rgba(8,8,8,.9);padding:.9rem 1.3rem;box-shad
 
 /* ---------- copy layers ---------- */
 #ui{position:fixed;inset:0;pointer-events:none;z-index:4}
-#ui > *{pointer-events:auto}
+/* only the parts you can actually use take taps. invisible overlays (the YESOP file card, titles, readouts,
+   the Continue button while hidden) must never sit on top of a button and swallow its clicks */
+#ui > #halo,#ui > #choice,#ui > #micro,#ui > #receipt,#ui > #pinned,#ui > #init,#ui > .act.in{pointer-events:auto}
 .caret{display:inline-block;width:.55em;height:1em;margin-left:.08em;vertical-align:-.12em;background:var(--signal);animation:blink 1s steps(2) infinite}
 .v-flattening .caret,.stamps.system .caret{background:var(--red)}
 /* the flattening's caret is pressed flat, like everything it touches */
