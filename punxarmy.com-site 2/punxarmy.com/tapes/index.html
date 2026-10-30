@@ -29,12 +29,12 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
 @media (max-height:820px) and (min-width:901px){.deck .kicker{margin:.6rem 0 .4rem}.source .note{font-size:.66rem;margin-top:.3rem}}
 .intro{min-width:0}
 .intro .sub{margin-top:.4rem}
-.stage{display:grid;gap:.9rem 2.4rem;margin-top:.6rem;grid-template-columns:auto minmax(18rem,1fr);grid-template-rows:auto auto minmax(16.5rem,1fr) auto;
-  grid-template-areas:"player intro" "player readout" "player rack" "player source";height:max(calc(100svh - 3.4rem),44rem)}
+.stage{display:grid;gap:.9rem 2.4rem;margin-top:.6rem;--sh:max(calc(100svh - 3.4rem),44rem);grid-template-columns:min(calc((var(--sh) - 4rem) * .8),62%) minmax(18rem,1fr);grid-template-rows:auto auto 1fr auto;
+  grid-template-areas:"player intro" "player readout" "player rack" "player source";min-height:var(--sh)}
 .stage>.intro{grid-area:intro}.stage>.player{grid-area:player;display:flex;flex-direction:column;min-height:0}.stage>.readout{grid-area:readout}.stage>.rack{grid-area:rack}.stage>.source{grid-area:source}
 /* ── the player ── */
 .player{position:relative;min-width:0}
-.frame{position:relative;height:calc(100% - 2.2rem);aspect-ratio:4/5;max-width:100%;margin:0 auto;background:#0b0b0b;
+.frame{position:relative;width:100%;height:auto;aspect-ratio:4/5;margin:0 auto;background:#0b0b0b;
   -webkit-mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 7%,#000 92%,transparent);
   -webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 7%,#000 92%,transparent);mask-composite:intersect}
 .frame canvas{display:block;width:100%;height:100%}
@@ -77,7 +77,7 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
 .rack{min-width:0;display:flex;flex-direction:column;min-height:0}
 .rack h2{margin:0 0 .15rem;font-size:1.1rem}
 .rack .hint{font-size:.7rem;color:var(--stone);margin:0 0 .55rem}
-.rack ol{list-style:none;display:grid;align-content:start;gap:.4rem;flex:1;min-height:0;overflow-y:auto;padding:.2rem .5rem .6rem .2rem;scrollbar-width:thin;scrollbar-color:#3a3a38 transparent}
+.rack ol{list-style:none;display:grid;align-content:start;gap:.4rem;flex:1;min-height:0;max-height:max(15.5rem,calc(var(--sh) - 36rem));overflow-y:auto;padding:.2rem .5rem .6rem .2rem;scrollbar-width:thin;scrollbar-color:#3a3a38 transparent}
 .tape{all:unset;box-sizing:border-box;display:grid;grid-template-columns:5.4rem 1fr;gap:.05rem .8rem;align-items:center;width:100%;padding:.3rem .7rem .3rem .4rem;cursor:pointer;
   background:linear-gradient(90deg,var(--asphalt2),rgba(18,18,17,.6));border:1px solid var(--line);border-left:3px solid rgb(var(--ac));border-radius:4px;transition:border-color .2s,background .2s,transform .15s}
 .tape:hover{background:var(--asphalt3);transform:translateX(-3px)}
@@ -94,7 +94,7 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
 .tape.back .shot{animation:slotin .5s cubic-bezier(.2,.8,.2,1)}
 @keyframes slotin{from{transform:translateX(-140%) rotate(-6deg) scale(.9);opacity:0}to{transform:none;opacity:1}}
 .tape[aria-disabled="true"]{cursor:progress}
-.below{margin-top:2.6rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+.below{margin-top:3rem;position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
 @media (max-width:900px){
   .stage{grid-template-columns:1fr;grid-template-rows:none;grid-template-areas:"intro" "player" "readout" "rack" "source";height:auto;min-height:0}
   .frame{height:auto;width:100%}
