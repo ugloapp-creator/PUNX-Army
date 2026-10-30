@@ -320,8 +320,9 @@ const source = $('#source'), embed = $('#embed'), spOpen = $('#sp-open'), spNote
 // Spotify's own player in an iframe, driven with the same messages Spotify's IFrame API sends
 // (play, pause, resume, seek; it answers with ready and playback_update). No Spotify script runs on this page.
 const SP_ORIGIN = 'https://open.spotify.com';
-// Safari (and every browser on iPhone/iPad) only lets the player start sound inside the click itself,
-// so there the deck starts the song the moment you pick a tape, from a player it has already warmed up.
+// Safari (and every browser on iPhone/iPad) only lets the player start sound inside a click. So at the click the deck
+// sends play and pause back to back to a player it has already warmed up (Safari then trusts that player), and the song
+// actually starts once the tape is seated and PLAY goes down, like everywhere else.
 const UA = navigator.userAgent;
 const WEBKIT = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || (/Safari\//.test(UA) && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Android/.test(UA));
 function spController(host) {
@@ -366,7 +367,7 @@ function player(album) {
   let p = players.find((x) => x.cur() === uri); if (p) return p;
   if (players.length < 2) {
     p = spController(embed); const me = p;
-    p.addListener('playback_update', (e) => { if (me === ctrl) onSpot(e); });
+    p.addListener('playback_update', (e) => { if (me.hold && e.data && !e.data.isPaused) me.pause(); if (me === ctrl) onSpot(e); });
     p.addListener('error', () => { if (me === ctrl && current && !state.playing) spFail(); });
     players.push(p);
   } else p = players.find((x) => x !== ctrl) || players[0];
@@ -379,16 +380,13 @@ function activate(p) {
   ctrl = p;
 }
 function warm(album) { if (!busy && (!current || current.album !== album)) player(album); }
-// Safari: start the song inside the click, from a player that already holds that tape
+// Safari: unlock the warmed player inside the click; the song itself starts when the tape is seated
 let early = null;
 function startEarly(s) {
   early = null;
   if (!WEBKIT || busy || state.tape === s.n) return;
-  const p = players.find((x) => x.cur() === uriOf(s.album) && x.isReady()); if (!p) return;
-  if (ctrl && ctrl !== p) { try { ctrl.pause(); } catch (e) {} }
-  p.show(true); players.forEach((x) => { if (x !== p) x.show(false); });
-  if (!embed.classList.contains('live')) { [...embed.childNodes].forEach((n) => { if (n.nodeType === 3) n.remove(); }); embed.classList.add('live'); }
-  p.play(); early = { p, album: s.album };
+  const p = players.find((x) => x.cur() === uriOf(s.album) && x.isReady()); if (!p || p === ctrl) return;
+  p.hold = true; p.play(); p.pause(); early = { p, album: s.album };
 }
 function onSpot(e) {
   const d = e.data || {}; spot = { paused: d.isPaused, pos: d.position || 0, dur: d.duration || 0, buf: d.isBuffering, at: performance.now() };
@@ -472,7 +470,7 @@ async function insert(n) {
   await sleep(180);
   if (current !== s) return;
   setPlaying(true, false);
-  if (fromEarly) { lastCmd = performance.now(); if (spot.paused) spPlay(); } else spPlay();
+  if (fromEarly) { sp.hold = false; fresh = false; try { sp.seek(0); } catch (e) {} spPlay(); } else spPlay();
 }
 async function eject() {
   if (!state.tape) { if (state.door === 'open') await closeEmpty(); else await openDoor(); say(state.door === 'open' ? 'Door open. Pick a tape.' : 'Pick a tape from the rack.'); return; }
