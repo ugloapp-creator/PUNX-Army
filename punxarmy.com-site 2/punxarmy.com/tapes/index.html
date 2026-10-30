@@ -68,7 +68,7 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
 .source{min-width:0}
 .source .lab{display:flex;justify-content:space-between;gap:1rem;font:600 .6rem var(--f-mono);letter-spacing:.24em;text-transform:uppercase;color:var(--stone);margin-bottom:.4rem}
 .source .lab a{color:var(--stone)}.source .lab a:hover{color:var(--signal)}
-#embed{min-height:152px;border-radius:12px;background:var(--asphalt2);border:1px dashed #3a3a38;display:flex;align-items:center;justify-content:center;text-align:center;padding:1rem;color:var(--stone);font-size:.78rem;transition:box-shadow .3s}
+#embed{position:relative;min-height:152px;border-radius:12px;background:var(--asphalt2);border:1px dashed #3a3a38;display:flex;align-items:center;justify-content:center;text-align:center;padding:1rem;color:var(--stone);font-size:.78rem;transition:box-shadow .3s}
 #embed.live{display:block;padding:0;border:0;background:none}
 #embed iframe{display:block;border:0;border-radius:12px}
 .source.nudge #embed{box-shadow:0 0 0 2px var(--signal),0 0 30px rgba(166,255,0,.35)}
@@ -138,12 +138,12 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
       </div>
     <aside class="rack" aria-labelledby="rack-h">
       <h2 id="rack-h">The rack</h2>
-      <p class="hint">Every YESOP release, oldest at the top. Tap a tape to load it.</p>
+      <p class="hint">Every YESOP release, newest at the top. Pick a tape and it plays.</p>
       <ol id="tapes"></ol>
     </aside>
       <div class="source" id="source">
         <p class="lab"><span>Signal source // Spotify</span><a id="sp-open" href="https://open.spotify.com/artist/5oYDSF03y6Po1oynfMgdWL" rel="noopener" target="_blank">Open in Spotify</a></p>
-        <div id="embed">Spotify's player appears here when you put a tape in. Nothing from Spotify loads before that.</div>
+        <div id="embed">Spotify's player appears here when you pick a tape. Nothing from Spotify loads until you start using the deck.</div>
         <p class="note" id="sp-note">Logged in to Spotify in this browser? You hear the whole track. If not, Spotify plays a 30-second preview.</p>
       </div>
   </div>
@@ -320,7 +320,11 @@ const source = $('#source'), embed = $('#embed'), spOpen = $('#sp-open'), spNote
 // Spotify's own player in an iframe, driven with the same messages Spotify's IFrame API sends
 // (play, pause, resume, seek; it answers with ready and playback_update). No Spotify script runs on this page.
 const SP_ORIGIN = 'https://open.spotify.com';
-function spController(host, album) {
+// Safari (and every browser on iPhone/iPad) only lets the player start sound inside the click itself,
+// so there the deck starts the song the moment you pick a tape, from a player it has already warmed up.
+const UA = navigator.userAgent;
+const WEBKIT = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || (/Safari\//.test(UA) && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Android/.test(UA));
+function spController(host) {
   const f = document.createElement('iframe');
   f.title = 'Spotify player'; f.width = '100%'; f.height = '152'; f.setAttribute('frameborder', '0'); f.setAttribute('allowfullscreen', '');
   f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
@@ -343,25 +347,48 @@ function spController(host, album) {
       f.src = SP_ORIGIN + '/embed/' + type + '/' + encodeURIComponent(id) + '?utm_source=iframe-api';
       clearTimeout(readyT); readyT = setTimeout(() => { if (!ready) emit('error', { code: 'timeout' }); }, 12000);
     },
+    cur: () => cur,
+    show: (on) => { f.style.cssText = on ? '' : 'position:absolute;left:0;top:0;visibility:hidden;pointer-events:none'; f.tabIndex = on ? 0 : -1; },
     isReady: () => ready,
     reload: () => { const u = cur; cur = ''; c.loadUri(u); },
     whenReady: (ms) => new Promise((res) => { if (ready) return res(true); const t0 = Date.now(); const k = setInterval(() => { if (ready || Date.now() - t0 > ms) { clearInterval(k); res(ready); } }, 150); }),
     play: () => send({ command: 'play' }), pause: () => send({ command: 'pause' }), resume: () => send({ command: 'resume' }),
     seek: (sec) => send({ command: 'seek', timestamp: sec }),
   };
-  host.appendChild(f); c.loadUri('spotify:album:' + album);
+  c.show(false); host.appendChild(f);
   return c;
 }
-function spotify() {
-  if (!apiP) {
-    embed.textContent = ''; embed.classList.add('live');
-    ctrl = spController(embed, current ? current.album : SONGS[0].album);
-    ctrl.addListener('playback_update', onSpot);
-    // blocked (ad blocker, school network): say so, and let PLAY try again
-    ctrl.addListener('error', () => { if (current && !state.playing) spFail(); });
-    apiP = Promise.resolve(ctrl);
-  }
-  return apiP;
+// at most two players: the one you see, and one warming up the tape you are about to pick
+const players = [];
+const uriOf = (album) => 'spotify:album:' + album;
+function player(album) {
+  const uri = uriOf(album);
+  let p = players.find((x) => x.cur() === uri); if (p) return p;
+  if (players.length < 2) {
+    p = spController(embed); const me = p;
+    p.addListener('playback_update', (e) => { if (me === ctrl) onSpot(e); });
+    p.addListener('error', () => { if (me === ctrl && current && !state.playing) spFail(); });
+    players.push(p);
+  } else p = players.find((x) => x !== ctrl) || players[0];
+  p.loadUri(uri); return p;
+}
+function activate(p) {
+  if (!embed.classList.contains('live')) { [...embed.childNodes].forEach((n) => { if (n.nodeType === 3) n.remove(); }); embed.classList.add('live'); }
+  players.forEach((x) => x.show(x === p));
+  if (ctrl && ctrl !== p) { try { ctrl.pause(); } catch (e) {} }
+  ctrl = p;
+}
+function warm(album) { if (!busy && (!current || current.album !== album)) player(album); }
+// Safari: start the song inside the click, from a player that already holds that tape
+let early = null;
+function startEarly(s) {
+  early = null;
+  if (!WEBKIT || busy || state.tape === s.n) return;
+  const p = players.find((x) => x.cur() === uriOf(s.album) && x.isReady()); if (!p) return;
+  if (ctrl && ctrl !== p) { try { ctrl.pause(); } catch (e) {} }
+  p.show(true); players.forEach((x) => { if (x !== p) x.show(false); });
+  if (!embed.classList.contains('live')) { [...embed.childNodes].forEach((n) => { if (n.nodeType === 3) n.remove(); }); embed.classList.add('live'); }
+  p.play(); early = { p, album: s.album };
 }
 function onSpot(e) {
   const d = e.data || {}; spot = { paused: d.isPaused, pos: d.position || 0, dur: d.duration || 0, buf: d.isBuffering, at: performance.now() };
@@ -433,7 +460,9 @@ async function insert(n) {
   spOpen.href = 'https://open.spotify.com/album/' + s.album;
   spNote.textContent = 'Logged in to Spotify in this browser? You hear the whole track. If not, Spotify plays a 30-second preview.';
   say('Loading tape ' + String(n).padStart(3, '0') + '.');
-  const api = spotify().then((c) => { if (c && current === s) spLoad(s.album); return c; });
+  const fromEarly = early && early.album === s.album; const sp = fromEarly ? early.p : player(s.album); early = null;
+  activate(sp); if (!fromEarly) { fresh = true; starting = 0; }
+  lastCmd = performance.now();
   trim([seq.sheet]); const ready = loadSeq(seq);
   let slow = 0; const wait = ready.then(() => { clearTimeout(slow); veil.hidden = true; });
   slow = setTimeout(() => { veil.textContent = 'Winding tape ' + String(n).padStart(3, '0'); veil.hidden = false; }, 350);
@@ -441,11 +470,9 @@ async function insert(n) {
   await play(seq, { cues: { 1: SFX.tapeIn, 21: SFX.seat, 33: SFX.slam } });
   state.door = 'closed';
   await sleep(180);
-  const c = await api;
   if (current !== s) return;
-  if (!c) { spFail(); return; }
-  if (current !== s) return;
-  setPlaying(true, false); spPlay();
+  setPlaying(true, false);
+  if (fromEarly) { lastCmd = performance.now(); if (spot.paused) spPlay(); } else spPlay();
 }
 async function eject() {
   if (!state.tape) { if (state.door === 'open') await closeEmpty(); else await openDoor(); say(state.door === 'open' ? 'Door open. Pick a tape.' : 'Pick a tape from the rack.'); return; }
@@ -495,7 +522,7 @@ keyBtn.PLAY.addEventListener('click', () => run(async () => {
   audio();
   if (!state.tape) { await tap('PLAY'); say('No tape in the deck. Pick one from the rack.'); return; }
   if (state.playing) return;
-  if (!ctrl || !ctrl.isReady()) { say('Connecting to Spotify.'); const c = await spotify(); if (!c.isReady()) c.reload(); if (!(await c.whenReady(6000))) { await tap('PLAY'); spFail(); return; } }
+  if (!ctrl || !ctrl.isReady()) { say('Connecting to Spotify.'); const c = player(current.album); activate(c); if (!c.isReady()) c.reload(); if (!(await c.whenReady(6000))) { await tap('PLAY'); spFail(); return; } fresh = true; }
   setPlaying(true, false); spPlay(); source.classList.remove('nudge');
 }));
 keyBtn.STOP.addEventListener('click', () => run(async () => {
@@ -539,14 +566,14 @@ document.addEventListener('keyup', (e) => { if (e.key === 'ArrowLeft' || e.key =
 
 /* ── the rack ── */
 const list = $('#tapes'), rackBtn = {};
-for (const s of SONGS) {
+for (const s of [...SONGS].reverse()) {
   const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button'; b.className = 'tape';
   b.style.setProperty('--ac', s.accent.join(','));
   b.setAttribute('aria-label', 'Load tape ' + s.n + ': ' + s.title + ', ' + s.year);
   b.innerHTML = '<span class="shot"><img src="' + base + 't/tape_' + String(s.n).padStart(2, '0') + '.webp" alt="" width="760" height="520" loading="lazy" decoding="async"></span>' +
     '<span class="n">TAPE // ' + String(s.n).padStart(3, '0') + '</span><span class="t">' + esc(s.title) + '</span><span class="m">' + s.year + ' · <em>' + esc(s.note) + '</em></span>';
-  b.addEventListener('click', () => run(() => load(s.n)));
-  let hv = 0; const pre = () => { if (!busy) { trim([SEQ(s.n).sheet, state.tape ? SEQ(state.tape).sheet : '']); loadSeq(SEQ(s.n)); } };
+  b.addEventListener('click', () => { audio(); startEarly(s); run(() => load(s.n)); });
+  let hv = 0; const pre = () => { if (!busy) { trim([SEQ(s.n).sheet, state.tape ? SEQ(state.tape).sheet : '']); loadSeq(SEQ(s.n)); warm(s.album); } };
   b.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hv = setTimeout(pre, 280); });
   b.addEventListener('pointerleave', () => clearTimeout(hv));
   b.addEventListener('focus', pre);
@@ -562,8 +589,10 @@ function setBusy(on) { for (const s of SONGS) rackBtn[s.n].setAttribute('aria-di
 /* ── start: draw the deck, then warm the shared frames ── */
 veil.hidden = false;
 img(MF.idle).then(() => { veil.hidden = true; repaint(); });
-const warm = () => { loadSeq(MF.open); img(MF.keysImg.src); img(MF.reel.sheet); img('f/open.webp'); };
-('requestIdleCallback' in window) ? requestIdleCallback(warm, { timeout: 2500 }) : setTimeout(warm, 1200);
+const warmFrames = () => { loadSeq(MF.open); img(MF.keysImg.src); img(MF.reel.sheet); img('f/open.webp'); };
+('requestIdleCallback' in window) ? requestIdleCallback(warmFrames, { timeout: 2500 }) : setTimeout(warmFrames, 1200);
+// touch screens have no hover: the first touch on the page warms the newest tape, the one most people pick
+addEventListener('touchstart', () => warm(SONGS[SONGS.length - 1].album), { once: true, passive: true });
 const q = new URLSearchParams(location.search).get('tape'); if (q && songOf(+q)) rackBtn[+q].focus({ preventScroll: true });
 })();
 </script>
