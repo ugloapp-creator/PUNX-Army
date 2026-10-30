@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guest Pass | PUNX ARMY</title>
+<meta name="description" content="Someone put your name in the PUNX Casting Room.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="Someone put your name in the PUNX Casting Room">
+<meta property="og:description" content="Not as a follow. As a creative they want in the room. Claim your Guest Pass.">
+<meta property="og:image" content="https://punxarmy.com/og-image.jpg">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/casting/casting.css">
+<script src="/consent.js" defer></script>
+</head>
+<body>
+<header class="top"><a href="/">PUNX ARMY</a><span>Guest Pass</span></header>
+<main class="wrap">
+  <section id="pass" class="hide">
+    <p class="kicker">PUNX PASSPORT // THE CASTING ROOM · GUEST PASS</p>
+    <p class="quiet" id="for"></p>
+    <h1 class="display" id="who"></h1>
+    <p class="sub" style="margin-top:1.4rem">Not as a follow.<br>As a creative they want in the room.</p>
+    <h2>Claim your Guest Pass</h2>
+    <ol class="clean">
+      <li><b>Join the Casting Room</b> on Discord.</li>
+      <li>In <b>#how-it-works</b>, press <b>CLAIM GUEST PASS</b> and paste your code.</li>
+      <li><b>Do one small thing</b> (under two minutes): leave a reference, introduce yourself, react to a look. You both get <b>CREW CONNECTED</b> and a Passport stamp.</li>
+    </ol>
+    <div class="callout"><span class="tiny">YOUR CODE</span><br><b id="code" style="font-size:1.4rem;letter-spacing:.12em"></b></div>
+    <div class="row"><a class="btn" id="join" href="/room" target="_blank" rel="noopener">Join the Discord</a><button class="btn ghost" type="button" id="copy">Copy my code</button></div>
+    <p class="tiny" style="margin-top:1rem">Free. No entry or purchase needed. Recognition only: it doesn't affect anyone's judging.</p>
+    <p class="quiet">Nobody makes a look alone, and they wanted the world to know you were part of theirs. Claiming your pass puts your name on the record next to theirs, in ARCHIVE 001. The room is warm, the door is open, and nobody there will make you feel new for long.</p>
+    <h2>Want to enter too?</h2>
+    <p>Show us a look that feels like you. One look gets a paid PUNX editorial shoot. <a href="/casting/">See the Casting Room</a>.</p>
+  </section>
+  <section id="state" class="hide">
+    <p class="kicker">GUEST PASS</p>
+    <h1 class="display" id="st-h"></h1>
+    <p class="lead" id="st-p"></p>
+    <div class="row" style="margin-top:1.2rem"><a class="btn" href="/casting/">The Casting Room</a><a class="btn ghost" href="/room" target="_blank" rel="noopener">Join the Discord</a></div>
+  </section>
+  <footer class="bottom">
+    <nav aria-label="Site"><a href="/">The initiation</a><a href="/tapes/">Archive tapes</a><a href="/casting/">The Casting Room</a><a href="/casting/rules/">Official rules</a><a href="/rights/">Rights &amp; credits</a><a href="/privacy/">Privacy</a><a href="/privacy/#storage">Cookies &amp; storage</a><a href="/privacy/#choices" data-cookie-settings>Cookie settings</a><a href="/terms/">Terms</a></nav>
+    <p>PUNX ARMY is the campaign world of YESOP. No ads, nothing sold, and analytics cookies only if you say yes.</p>
+    <p>Not sponsored, endorsed or administered by, or associated with, Instagram, TikTok or Discord.</p>
+  </footer>
+</main>
+<script>
+(()=>{const $=s=>document.querySelector(s);
+const code=(location.pathname.match(/\/pass\/([a-z0-9]{6,12})\/?$/i)||[])[1];
+const show=(h,p)=>{$('#st-h').textContent=h;$('#st-p').textContent=p;$('#state').classList.remove('hide')};
+if(!code){show('No pass here.','This link is missing its code. Check the link you were sent.');return}
+fetch('/api/pass/'+code.toLowerCase(),{cache:'no-store'}).then(r=>r.json().then(j=>[r.status,j])).then(([s,j])=>{
+  if(s!==200){show('Pass not found.','That code did not match a Guest Pass. Check the link you were sent, or come in anyway.');return}
+  if(j.expired&&!j.claimed){show('This pass has expired.','Guest Passes last 21 days. You are still welcome in the Casting Room.');return}
+  $('#for').textContent='For @'+j.to+(j.toRole?' · '+j.toRole:'');
+  $('#who').textContent='@'+j.from+' put your name in the PUNX Casting Room.';
+  $('#code').textContent=code.toLowerCase();
+  if(j.completed){$('#pass').querySelector('h2').textContent='Already connected';}
+  $('#pass').classList.remove('hide');
+}).catch(()=>show('One moment.','The archive is waking up. Refresh in a minute.'));
+$('#copy').onclick=e=>{const t=$('#code').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{e.target.textContent='Copied';setTimeout(()=>e.target.textContent='Copy my code',1500)}).catch(()=>{})};
+})();
+</script>
+</body>
+</html>

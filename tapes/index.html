@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Archive Tapes | PUNX ARMY</title>
+<meta name="description" content="Eleven recovered tapes from YESOP. Pick one, put it in the deck, press play. Every YESOP release, playable right here on punxarmy.com.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://punxarmy.com/tapes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PUNX ARMY">
+<meta property="og:url" content="https://punxarmy.com/tapes/">
+<meta property="og:title" content="ARCHIVE TAPES // YESOP">
+<meta property="og:description" content="Eleven recovered tapes. Pick one, put it in the deck, press play.">
+<meta property="og:image" content="https://punxarmy.com/tapes/og-tapes.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/tapes/f/idle.webp" as="image" type="image/webp">
+<link rel="stylesheet" href="/casting/casting.css">
+<script src="/consent.js" defer></script>
+<style>
+body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,.07),transparent 70%),radial-gradient(ellipse 90% 40% at 50% 0%,rgba(166,255,0,.04),transparent 70%)}
+.deck{width:min(78rem,100%);margin:0 auto;padding:0 max(1rem,env(safe-area-inset-left)) 3rem max(1rem,env(safe-area-inset-right))}
+.deck .kicker{margin-top:1rem}
+.deck h1.display{font-size:clamp(2.3rem,5.2vw,3.9rem)}
+.intro{min-width:0}
+.intro .sub{margin-top:.4rem}
+.stage{display:grid;gap:.9rem 2.4rem;margin-top:.6rem;grid-template-columns:auto minmax(18rem,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;
+  grid-template-areas:"player intro" "player readout" "player rack" "player source";height:calc(100svh - 3.4rem);min-height:36rem}
+.stage>.intro{grid-area:intro}.stage>.player{grid-area:player;display:flex;flex-direction:column;min-height:0}.stage>.readout{grid-area:readout}.stage>.rack{grid-area:rack}.stage>.source{grid-area:source}
+/* ── the player ── */
+.player{position:relative;min-width:0}
+.frame{position:relative;height:calc(100% - 2.2rem);aspect-ratio:4/5;max-width:100%;margin:0 auto;background:#0b0b0b;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 7%,#000 92%,transparent);
+  -webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 7%,#000 92%,transparent);mask-composite:intersect}
+.frame canvas{display:block;width:100%;height:100%}
+.hot{position:absolute;inset:0}
+.hot button{all:unset;position:absolute;cursor:pointer;border-radius:6px;-webkit-tap-highlight-color:transparent}
+.hot button:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.hot button[disabled]{cursor:default}
+.hot .door{border-radius:10px}
+.hot .tip{position:absolute;transform:translate(-50%,-100%);margin-top:-6px;padding:.25rem .45rem;background:rgba(10,10,10,.92);border:1px solid #3a3a38;border-radius:3px;
+  font:600 .56rem var(--f-mono);letter-spacing:.2em;color:var(--flat);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+.hot .tip.on{opacity:1}
+.veil{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);padding:.5rem .8rem;background:rgba(10,10,10,.85);border:1px solid #3a3a38;border-left:3px solid var(--signal);
+  font:600 .62rem var(--f-mono);letter-spacing:.22em;color:var(--flat);text-transform:uppercase;pointer-events:none}
+.veil[hidden]{display:none}
+/* readout: an LCD strip under the deck */
+.readout{display:grid;grid-template-columns:auto 1fr auto;gap:.2rem 1rem;align-items:center;padding:.7rem .9rem;
+  background:#0d100b;border:1px solid #24301a;border-radius:4px;box-shadow:inset 0 0 18px rgba(166,255,0,.06);font:600 .7rem/1.35 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:#b8e86a}
+.readout .lab{color:#5d7a36;font-size:.56rem;letter-spacing:.24em}
+.readout .title{color:#d6ff95;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.readout .count{font-size:1.15rem;letter-spacing:.12em;color:#d6ff95;text-align:right;font-variant-numeric:tabular-nums}
+.readout .state{grid-column:1/-1;color:#8fb653;font-size:.62rem;min-height:1.1em}
+.readout .state a{color:#d6ff95}
+.readout .bar{grid-column:1/-1;height:3px;background:#1b2414;border-radius:2px;overflow:hidden}
+.readout .bar i{display:block;height:100%;width:0;background:#a6ff00;transition:width .5s linear}
+.controls-help{margin:.4rem auto 0;width:100%;max-width:34rem;display:flex;flex-wrap:wrap;gap:.4rem 1rem;justify-content:space-between;align-items:center;font-size:.68rem;color:var(--stone);letter-spacing:.06em}
+.controls-help kbd{font:600 .62rem var(--f-mono);border:1px solid #3a3a38;border-bottom-width:2px;border-radius:3px;padding:0 .3rem;color:var(--flat)}
+.sfx{all:unset;cursor:pointer;font:600 .62rem var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--stone);border:1px solid #3a3a38;border-radius:3px;padding:.35rem .55rem}
+.sfx:hover{color:var(--flat)}.sfx:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.sfx[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
+/* the Spotify strip: Spotify's own player, kept visible as their terms require */
+.source{min-width:0}
+.source .lab{display:flex;justify-content:space-between;gap:1rem;font:600 .6rem var(--f-mono);letter-spacing:.24em;text-transform:uppercase;color:var(--stone);margin-bottom:.4rem}
+.source .lab a{color:var(--stone)}.source .lab a:hover{color:var(--signal)}
+#embed{min-height:152px;border-radius:12px;background:var(--asphalt2);border:1px dashed #3a3a38;display:flex;align-items:center;justify-content:center;text-align:center;padding:1rem;color:var(--stone);font-size:.78rem;transition:box-shadow .3s}
+#embed.live{display:block;padding:0;border:0;background:none}
+#embed iframe{display:block;border:0;border-radius:12px}
+.source.nudge #embed{box-shadow:0 0 0 2px var(--signal),0 0 30px rgba(166,255,0,.35)}
+.source .note{font-size:.72rem;color:var(--stone);margin:.45rem 0 0}
+/* ── the rack ── */
+.rack{min-width:0;display:flex;flex-direction:column;min-height:0}
+.rack h2{margin:0 0 .15rem;font-size:1.1rem}
+.rack .hint{font-size:.7rem;color:var(--stone);margin:0 0 .55rem}
+.rack ol{list-style:none;display:grid;align-content:start;gap:.5rem;flex:1;min-height:0;overflow-y:auto;padding:.2rem .5rem .6rem .2rem;scrollbar-width:thin;scrollbar-color:#3a3a38 transparent}
+.tape{all:unset;box-sizing:border-box;display:grid;grid-template-columns:7.2rem 1fr;gap:.2rem .9rem;align-items:center;width:100%;padding:.45rem .7rem .45rem .45rem;cursor:pointer;
+  background:linear-gradient(90deg,var(--asphalt2),rgba(18,18,17,.6));border:1px solid var(--line);border-left:3px solid rgb(var(--ac));border-radius:4px;transition:border-color .2s,background .2s,transform .15s}
+.tape:hover{background:var(--asphalt3);transform:translateX(-3px)}
+.tape:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.tape .shot{position:relative;grid-row:1/4;aspect-ratio:760/520;transition:transform .45s cubic-bezier(.3,.7,.2,1),opacity .35s}
+.tape .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+.tape .n{font:600 .58rem var(--f-mono);letter-spacing:.24em;color:var(--stone)}
+.tape .t{font-family:var(--f-clean);font-size:1.12rem;line-height:1.05;text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+.tape .m{font-size:.68rem;color:var(--stone);line-height:1.3}
+.tape .m em{font-style:normal;color:rgb(var(--ac))}
+.tape.out .shot{transform:translateX(-140%) rotate(-6deg) scale(.9);opacity:0}
+.tape.out{border-left-color:var(--signal);background:#10140c}
+.tape.out .n::after{content:"  // IN THE DECK";color:var(--signal)}
+.tape.back .shot{animation:slotin .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes slotin{from{transform:translateX(-140%) rotate(-6deg) scale(.9);opacity:0}to{transform:none;opacity:1}}
+.tape[aria-disabled="true"]{cursor:progress}
+.below{margin-top:2.6rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+@media (max-width:900px){
+  .stage{grid-template-columns:1fr;grid-template-rows:none;grid-template-areas:"intro" "player" "readout" "rack" "source";height:auto;min-height:0}
+  .frame{height:auto;width:100%}
+  .rack ol{grid-auto-flow:column;grid-auto-columns:minmax(9.5rem,40%);max-height:none;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding-bottom:.8rem}
+  .tape{grid-template-columns:1fr;scroll-snap-align:start;padding:.5rem;border-left-width:1px;border-top:3px solid rgb(var(--ac))}
+  .tape .shot{grid-row:auto}
+  .tape:hover{transform:none}
+  .tape.out .shot{transform:translateY(-30%) scale(.8)}
+  .below{grid-template-columns:1fr}
+}
+@media (hover:none){.controls-help>span{display:none}.controls-help{justify-content:flex-end}}
+@media (min-width:901px) and (max-height:640px){.stage{height:auto}.frame{height:auto;width:min(100%,34rem)}}
+</style>
+</head>
+<body>
+<header class="top"><a href="/">PUNX ARMY</a><span>Archive Tapes</span></header>
+<main class="deck">
+  <div class="stage">
+  <div class="intro">
+    <div>
+      <p class="kicker">ARCHIVE 001 // RECOVERED SIGNALS // YESOP</p>
+      <h1 class="display">Archive Tapes</h1>
+      <p class="sub">Eleven tapes. Pick one. Press play.</p>
+    </div>
+  </div>
+
+    <section class="player" aria-label="The tape deck">
+      <div class="frame" id="frame">
+        <canvas id="cv" width="864" height="1080" role="img" aria-label="A white portable cassette deck seen from above, with a glass door over the tape well and six piano keys."></canvas>
+        <div class="hot" id="hot"></div>
+        <p class="veil" id="veil" hidden>Loading the deck</p>
+      </div>
+      <div class="controls-help">
+        <span>Keys: <kbd>Space</kbd> play / stop · <kbd>←</kbd><kbd>→</kbd> rewind / fast-forward · <kbd>E</kbd> eject</span>
+        <button class="sfx" id="sfx" type="button" aria-pressed="true">Deck sounds</button>
+      </div>
+    </section>
+      <div class="readout" id="readout">
+        <span class="lab">Tape</span><span class="title" id="ro-title">No tape in the deck</span><span class="count" id="ro-count" aria-label="Tape counter">000</span>
+        <span class="state" id="ro-state" role="status" aria-live="polite">Pick a tape from the rack.</span>
+        <span class="bar" aria-hidden="true"><i id="ro-bar"></i></span>
+      </div>
+    <aside class="rack" aria-labelledby="rack-h">
+      <h2 id="rack-h">The rack</h2>
+      <p class="hint">Every YESOP release, oldest at the top. Tap a tape to load it.</p>
+      <ol id="tapes"></ol>
+    </aside>
+      <div class="source" id="source">
+        <p class="lab"><span>Signal source // Spotify</span><a id="sp-open" href="https://open.spotify.com/artist/5oYDSF03y6Po1oynfMgdWL" rel="noopener" target="_blank">Open in Spotify</a></p>
+        <div id="embed">Spotify's player appears here when you put a tape in. Nothing from Spotify loads before that.</div>
+        <p class="note" id="sp-note">Logged in to Spotify in this browser? You hear the whole track. If not, Spotify plays a 30-second preview.</p>
+      </div>
+  </div>
+
+  <noscript><div class="callout"><b>The deck needs JavaScript.</b> You can still play every tape on <a href="https://open.spotify.com/artist/5oYDSF03y6Po1oynfMgdWL" rel="noopener">Spotify</a>.</div></noscript>
+
+  <div class="below">
+    <div class="card"><p class="n">THE KEYS</p><p class="t">Like the real thing</p><p>Play latches down. Stop releases it. Hold rewind or fast-forward to scrub. Eject pops the door and sends the tape home.</p></div>
+    <div class="card"><p class="n">THE RED KEY</p><p class="t">Side B is yours</p><p>Every tape has a blank side. Press record and find out what it's for.</p></div>
+    <div class="card"><p class="n">THE SOURCE</p><p class="t">Straight from Spotify</p><p>The music streams through Spotify's own player, so every play counts for YESOP. Follow him there to hear the next tape first.</p></div>
+  </div>
+
+  <footer class="bottom">
+    <nav aria-label="Site"><a href="/">The initiation</a><a href="/tapes/">Archive tapes</a><a href="/casting/">The Casting Room</a><a href="/casting/rules/">Official rules</a><a href="/rights/">Rights &amp; credits</a><a href="/privacy/">Privacy</a><a href="/privacy/#choices" data-cookie-settings>Cookie settings</a><a href="/terms/">Terms</a></nav>
+    <p>PUNX ARMY is the campaign world of YESOP. Music plays through Spotify's embedded player and Spotify's terms and privacy policy apply to it.</p>
+    <p>Not sponsored, endorsed or administered by, or associated with, Spotify, Instagram, TikTok or Discord.</p>
+  </footer>
+</main>
+
+<script>
+(() => {
+'use strict';
+const MF = {"W":1080,"H":1350,"idle":"f/idle.webp","open":{"base":"f/idle.webp","box":[245,335,630,506],"sheet":"f/open-seq.webp","n":18,"cols":6,"cw":504,"ch":405},"keys":{"REC":{"hull":[[193.0,812.1],[242.2,721.6],[242.7,721.2],[317.8,740.1],[321.9,763.6],[319.6,769.7],[278.4,868.5],[202.5,848.9],[196.9,841.6]],"hit":[193.0,721.2,128.9,147.3],"clip":"0.0% 61.7% 38.2% 0.3% 38.6% 0.0% 96.8% 12.8% 100.0% 28.8% 98.2% 32.9% 66.3% 100.0% 7.4% 86.7% 3.0% 81.7%"},"PLAY":{"hull":[[274.0,826.1],[316.8,741.1],[317.2,740.6],[395.0,760.3],[397.7,783.7],[359.9,881.9],[281.2,861.8],[276.6,855.5]],"hit":[274.0,740.6,123.7,141.3],"clip":"0.0% 60.5% 34.6% 0.4% 34.9% 0.0% 97.8% 13.9% 100.0% 30.5% 69.4% 100.0% 5.8% 85.8% 2.1% 81.3%"},"REW":{"hull":[[354.2,846.7],[394.0,760.3],[394.4,759.7],[472.3,779.5],[473.7,802.8],[438.1,902.2],[359.2,882.0],[355.5,876.0]],"hit":[354.2,759.7,119.5,142.5],"clip":"0.0% 61.1% 33.3% 0.4% 33.6% 0.0% 98.8% 13.9% 100.0% 30.2% 70.2% 100.0% 4.2% 85.8% 1.1% 81.6%"},"FF":{"hull":[[435.3,896.7],[435.4,867.6],[472.0,779.6],[472.4,779.1],[551.3,799.2],[551.3,822.2],[518.1,923.0],[438.1,902.5]],"hit":[435.3,779.1,116.0,143.9],"clip":"0.0% 81.7% 0.1% 61.5% 31.6% 0.3% 32.0% 0.0% 100.0% 14.0% 100.0% 30.0% 71.4% 100.0% 2.4% 85.8%"},"STOP":{"hull":[[516.2,917.5],[517.6,888.7],[551.0,799.3],[551.3,798.7],[631.4,819.1],[629.8,841.7],[599.1,943.9],[518.0,923.2]],"hit":[516.2,798.7,115.2,145.2],"clip":"0.0% 81.8% 1.2% 62.0% 30.2% 0.4% 30.5% 0.0% 100.0% 14.0% 98.6% 29.6% 72.0% 100.0% 1.6% 85.7%"},"EJECT":{"hull":[[596.3,944.2],[599.3,915.6],[631.4,818.1],[631.6,817.6],[713.7,838.4],[710.5,860.7],[680.4,971.6],[597.3,950.3]],"hit":[596.3,817.6,117.4,154.0],"clip":"0.0% 82.2% 2.6% 63.6% 29.9% 0.3% 30.1% 0.0% 100.0% 13.5% 97.3% 28.0% 71.6% 100.0% 0.9% 86.2%"}},"keysImg":{"src":"f/keys.webp","box":[190,719,524,254]},"win":[[480.0,542.4],[638.0,578.3],[626.1,615.1],[466.0,578.2]],"reel":{"box":[460,539,186,80],"sheet":"f/reels.webp","n":12,"cols":6,"cw":149,"ch":64},"door":[322.9,459.0,440.1,282.2],"doorClip":"16.9% 0.0% 100.0% 29.6% 87.2% 100.0% 0.0% 67.0%","songs":{"1":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-01.webp","n":36,"cols":6,"cw":668,"ch":643},"2":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-02.webp","n":36,"cols":6,"cw":668,"ch":643},"3":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-03.webp","n":36,"cols":6,"cw":668,"ch":643},"4":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-04.webp","n":36,"cols":6,"cw":668,"ch":643},"5":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-05.webp","n":36,"cols":6,"cw":668,"ch":643},"6":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-06.webp","n":36,"cols":6,"cw":668,"ch":643},"7":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-07.webp","n":36,"cols":6,"cw":668,"ch":643},"8":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-08.webp","n":36,"cols":6,"cw":668,"ch":643},"9":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-09.webp","n":36,"cols":6,"cw":668,"ch":643},"10":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-10.webp","n":36,"cols":6,"cw":668,"ch":643},"11":{"base":"f/open.webp","box":[245,42,835,804],"sheet":"s/tape-11.webp","n":36,"cols":6,"cw":668,"ch":643}}};
+const SONGS = [{"n":1,"title":"TSNOTFORME","album":"0GKwtkaEP73r4Z1Ie5x4Hz","year":2024,"accent":[200,68,71],"note":"the first signal"},{"n":2,"title":"Chronic Feelings","album":"14oHvji2cPDcxKY7z6S5FO","year":2024,"accent":[236,206,96],"note":"play it when it hurts"},{"n":3,"title":"Im_AL1VE","album":"6Sd0Mp9rUPjMqZrqkbfIRA","year":2024,"accent":[214,150,96],"note":"proof of life"},{"n":4,"title":"Heaven and Hell","album":"5TGkU5NpAufaRNfNj71pDQ","year":2024,"accent":[225,141,92],"note":"both sides of the tape"},{"n":5,"title":"Type Timing","album":"2HiOaFDyGkiaOq1aaEWuEQ","year":2024,"accent":[190,128,84],"note":"wait for the drop"},{"n":6,"title":"Satisfied","album":"2LrSLZmYEIB86xiB2etsXx","year":2024,"accent":[229,190,120],"note":"almost enough"},{"n":7,"title":"Flex","album":"00Qg0QVmFBwpbQfvU3eDh7","year":2024,"accent":[228,105,58],"note":"volume all the way up"},{"n":8,"title":"Lifestyle","album":"2zBjjKo7wHZaoGfnYMvEDX","year":2025,"accent":[202,201,35],"note":"everyday armor"},{"n":9,"title":"GAWDZ_C0UNTRY","album":"1d2pBS4FtajEzU4QbKaA1w","year":2025,"accent":[166,255,0],"note":"holy static"},{"n":10,"title":"Cypress Hills","album":"3WJZjCBvkpoDGKD9mb7PYD","year":2026,"accent":[70,140,190],"note":"where the trees remember"},{"n":11,"title":"Savoir Faire","album":"3dHblMvUDgmYfjHf2H1O9d","year":2026,"accent":[82,149,183],"note":"prod. The Akkolades"}];
+const $ = (s) => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d'), hot = $('#hot'), veil = $('#veil');
+const roTitle = $('#ro-title'), roState = $('#ro-state'), roCount = $('#ro-count'), roBar = $('#ro-bar');
+const SX = cv.width / MF.W, FPS = 24, base = '/tapes/';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const pad3 = (n) => String(Math.max(0, Math.floor(n))).padStart(3, '0');
+const mmss = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const say = (html) => { roState.innerHTML = html; };
+
+/* ── images ── */
+const cache = new Map();
+// images are decoded off the main thread (createImageBitmap), so drawing a frame never stalls on a decode
+const viaImg = (src) => new Promise((res) => { const i = new Image(); i.decoding = 'async'; i.onload = () => (i.decode ? i.decode().catch(() => {}) : Promise.resolve()).then(() => res(i)); i.onerror = () => res(null); i.src = base + src; });
+function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const p = ('createImageBitmap' in window)
+    ? fetch(base + src).then((r) => (r.ok ? r.blob() : Promise.reject(r.status))).then((bl) => createImageBitmap(bl)).catch(() => viaImg(src))
+    : viaImg(src);
+  cache.set(src, p); return p;
+}
+const loadSeq = (seq) => Promise.all([img(seq.base), img(seq.sheet)]);
+// keep at most the tape in the deck plus one other tape decoded, so phones don't run out of memory
+function trim(keep) {
+  for (const k of [...cache.keys()]) if (k.startsWith('s/') && !keep.includes(k) && !(view.seq && view.seq.sheet === k)) { const p = cache.get(k); cache.delete(k); p.then((bm) => { if (bm && bm.close) bm.close(); }); }
+}
+async function cell(seq, f) {
+  const sh = await img(seq.sheet); if (!sh) return;
+  const sx = (f % seq.cols) * seq.cw, sy = Math.floor(f / seq.cols) * seq.ch, b = seq.box;
+  // sample a few pixels inside the cell: lossy compression and filtering bleed across cell borders,
+  // and the crop's outer pixels match the frame underneath anyway
+  const I = 3, kx = (b[2] * SX) / seq.cw, ky = (b[3] * SX) / seq.ch;
+  ctx.drawImage(sh, sx + I, sy + I, seq.cw - 2 * I, seq.ch - 2 * I, b[0] * SX + I * kx, b[1] * SX + I * ky, b[2] * SX - 2 * I * kx, b[3] * SX - 2 * I * ky);
+}
+
+/* ── drawing ── */
+// what is on screen: a base frame plus a crop, then pressed keys and spinning reels on top
+const view = { base: MF.idle, seq: null, f: 0, keys: {}, reel: -1 };
+async function paint() {
+  const b = await img(view.base); if (!b) return;
+  ctx.drawImage(b, 0, 0, cv.width, cv.height);
+  if (view.seq) await cell(view.seq, view.f);
+  const kd = Object.keys(view.keys).filter((k) => view.keys[k]);
+  if (kd.length) {
+    const ki = await img(MF.keysImg.src);
+    for (const k of kd) {
+      ctx.save(); poly(MF.keys[k].hull); ctx.clip();
+      ctx.drawImage(ki, MF.keysImg.box[0] * SX, MF.keysImg.box[1] * SX, MF.keysImg.box[2] * SX, MF.keysImg.box[3] * SX); ctx.restore();
+    }
+  }
+  if (view.reel >= 0) {
+    ctx.save(); poly(MF.win); ctx.clip(); await cell(MF.reel, view.reel); ctx.restore();
+  }
+}
+function poly(pts) { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x * SX, y * SX) : ctx.moveTo(x * SX, y * SX))); ctx.closePath(); }
+let painting = false, dirty = false;
+function repaint() { if (painting) { dirty = true; return; } painting = true; paint().finally(() => { painting = false; if (dirty) { dirty = false; repaint(); } }); }
+
+// play a sequence of crops over a base frame, forward or back, firing cues on frame numbers
+async function play(seq, { from = 0, to = seq.n - 1, fps = FPS, cues = {} } = {}) {
+  await loadSeq(seq);
+  const step = to >= from ? 1 : -1, n = Math.abs(to - from) + 1, t0 = performance.now();
+  view.base = seq.base; view.seq = seq;
+  for (let i = 0; i < n; i++) {
+    const f = from + i * step;
+    view.f = f;
+    if (cues[f]) cues[f]();
+    await paint();
+    const due = t0 + ((i + 1) * 1000) / fps, wait = due - performance.now();
+    if (wait > 0) await sleep(wait);
+  }
+}
+const hold = (seq, f) => { view.base = seq.base; view.seq = seq; view.f = f; };
+
+/* ── sound: everything synthesized, nothing plays until you press something ── */
+const sfxBtn = $('#sfx'); let sfxOn = true;
+try { sfxOn = localStorage.getItem('punx_deck_sfx') !== 'off'; } catch (e) {}
+sfxBtn.setAttribute('aria-pressed', String(sfxOn));
+sfxBtn.addEventListener('click', () => { sfxOn = !sfxOn; sfxBtn.setAttribute('aria-pressed', String(sfxOn)); try { localStorage.setItem('punx_deck_sfx', sfxOn ? 'on' : 'off'); } catch (e) {} if (!sfxOn) whirr(false); });
+let ac = null, out = null, noise = null;
+function audio() {
+  if (!sfxOn) return null;
+  if (!ac) {
+    const A = window.AudioContext || window.webkitAudioContext; if (!A) return null;
+    ac = new A(); out = ac.createGain(); out.gain.value = 0.55;
+    const comp = ac.createDynamicsCompressor(); out.connect(comp); comp.connect(ac.destination);
+    noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  if (ac.state === 'suspended') ac.resume();
+  return ac;
+}
+function env(g, t, a, peak, dur) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); }
+function click(dt = 0, f = 2500, dur = 0.03, v = 0.5, q = 1.8) {
+  const a = audio(); if (!a) return; const t = a.currentTime + dt;
+  const s = a.createBufferSource(); s.buffer = noise; const bp = a.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
+  const g = a.createGain(); env(g, t, 0.002, v, dur); s.connect(bp); bp.connect(g); g.connect(out); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+}
+function thump(dt = 0, f0 = 150, f1 = 60, dur = 0.12, v = 0.6) {
+  const a = audio(); if (!a) return; const t = a.currentTime + dt;
+  const o = a.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  const g = a.createGain(); env(g, t, 0.003, v, dur); o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.05);
+}
+function rattle(dt = 0, n = 3, v = 0.18) { for (let i = 0; i < n; i++) click(dt + 0.02 + Math.random() * 0.09, 3000 + Math.random() * 3000, 0.012, v * (1 - i / (n + 1)), 4); }
+function spring(dt = 0, v = 0.08) {
+  const a = audio(); if (!a) return; const t = a.currentTime + dt;
+  const o = a.createOscillator(); o.type = 'triangle'; o.frequency.setValueAtTime(520, t); o.frequency.exponentialRampToValueAtTime(140, t + 0.32);
+  const lfo = a.createOscillator(); lfo.frequency.value = 34; const lg = a.createGain(); lg.gain.value = 60; lfo.connect(lg); lg.connect(o.frequency);
+  const g = a.createGain(); env(g, t, 0.004, v, 0.36); o.connect(g); g.connect(out); o.start(t); lfo.start(t); o.stop(t + 0.4); lfo.stop(t + 0.4);
+}
+function whoosh(dt = 0, dur = 0.6, v = 0.16) {
+  const a = audio(); if (!a) return; const t = a.currentTime + dt;
+  const s = a.createBufferSource(); s.buffer = noise; s.loop = true; const bp = a.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2;
+  bp.frequency.setValueAtTime(500, t); bp.frequency.exponentialRampToValueAtTime(2200, t + dur * 0.45); bp.frequency.exponentialRampToValueAtTime(800, t + dur);
+  const g = a.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + dur * 0.4); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(bp); bp.connect(g); g.connect(out); s.start(t); s.stop(t + dur + 0.05);
+}
+function motor(dt = 0) {
+  const a = audio(); if (!a) return; const t = a.currentTime + dt;
+  const o = a.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(35, t); o.frequency.exponentialRampToValueAtTime(118, t + 0.45);
+  const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 500;
+  const g = a.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.15); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+  o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(t + 1);
+}
+let wh = null;
+function whirr(on, fast = 1) {
+  const a = audio();
+  if (!on || !a) { if (wh) { const t = ac.currentTime; wh.g.gain.cancelScheduledValues(t); wh.g.gain.setTargetAtTime(0.0001, t, 0.05); const w = wh; setTimeout(() => { try { w.o.stop(); w.s.stop(); } catch (e) {} }, 300); wh = null; } return; }
+  if (wh) return; const t = a.currentTime;
+  const o = a.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(240 * fast, t + 0.35);
+  const s = a.createBufferSource(); s.buffer = noise; s.loop = true; const bp = a.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3600; bp.Q.value = 0.9;
+  const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+  const g = a.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.2);
+  o.connect(lp); lp.connect(g); s.connect(bp); bp.connect(g); g.connect(out); o.start(t); s.start(t); wh = { o, s, g };
+}
+const SFX = {
+  keyDown: () => { click(0, 2100, 0.03, 0.55); thump(0, 170, 70, 0.07, 0.35); click(0.035, 4600, 0.01, 0.28, 5); },
+  keyUp: () => { click(0, 1700, 0.025, 0.32); rattle(0, 1, 0.1); },
+  latch: () => { click(0, 5200, 0.012, 0.35, 6); thump(0.01, 240, 120, 0.04, 0.2); },
+  doorPop: () => { click(0, 3200, 0.02, 0.5, 3); thump(0, 210, 90, 0.08, 0.3); spring(0.03); rattle(0.12, 3, 0.15); },
+  tapeIn: () => whoosh(0, 0.62, 0.16),
+  seat: () => { thump(0, 120, 55, 0.14, 0.75); click(0, 1400, 0.035, 0.42); rattle(0.04, 4, 0.2); },
+  slam: () => { thump(0, 95, 42, 0.18, 0.95); click(0, 2600, 0.025, 0.6); click(0.03, 5600, 0.012, 0.32, 6); rattle(0.05, 2, 0.12); },
+  tapeOut: () => { click(0, 2200, 0.02, 0.3); whoosh(0.05, 0.55, 0.14); },
+  denied: () => { thump(0, 90, 70, 0.1, 0.5); click(0.09, 900, 0.05, 0.25, 1); },
+};
+
+/* ── Spotify: the official embed, loaded only after you put a tape in ── */
+const spFail = () => say('Spotify could not load in this browser. <a href="' + spOpen.href + '" target="_blank" rel="noopener">Open this tape in Spotify</a>, or press play to try again.');
+let starting = 0, fresh = false, ctrl = null, apiP = null, spot = { paused: true, pos: 0, dur: 0, at: 0 }, lastCmd = 0;
+const source = $('#source'), embed = $('#embed'), spOpen = $('#sp-open'), spNote = $('#sp-note');
+function spotify() {
+  if (apiP) return apiP;
+  apiP = new Promise((res) => {
+    window.onSpotifyIframeApiReady = (API) => {
+      embed.textContent = ''; embed.classList.add('live'); const el = document.createElement('div'); embed.appendChild(el);
+      API.createController(el, { width: '100%', height: 152, uri: 'spotify:album:' + (current ? current.album : SONGS[0].album) }, (c) => {
+        ctrl = c; c.addListener('playback_update', onSpot); res(c);
+      });
+    };
+    const s = document.createElement('script'); s.src = 'https://open.spotify.com/embed/iframe-api/v1'; s.async = true;
+    // blocked (ad blocker, school network) or never ready: give up cleanly so PLAY can try again later
+    const give = () => { if (ctrl) return; apiP = null; s.remove(); res(null); };
+    s.onerror = give; setTimeout(give, 10000);
+    document.head.appendChild(s);
+  });
+  return apiP;
+}
+function onSpot(e) {
+  const d = e.data || {}; spot = { paused: d.isPaused, pos: d.position || 0, dur: d.duration || 0, buf: d.isBuffering, at: performance.now() };
+  if (!current) return;
+  if (spot.dur) { roBar.style.width = Math.min(100, (spot.pos / spot.dur) * 100) + '%'; roCount.textContent = pad3(spot.pos / 1000); }
+  if (spot.dur && spot.dur < 31500) spNote.textContent = 'Spotify is playing a 30-second preview. Log in to Spotify in this browser to hear the whole track.';
+  if (!current || busy) return;
+  const quiet = performance.now() - lastCmd < 1500;
+  if (!d.isPaused && !d.isBuffering) { starting = 0; fresh = false; }
+  if (!d.isPaused && !d.isBuffering && !state.playing) { source.classList.remove('nudge'); setPlaying(true, true); }
+  else if (d.isPaused && state.playing && !quiet && !starting && !d.isBuffering) {
+    const ended = spot.dur && spot.pos >= spot.dur - 1200;
+    setPlaying(false, true); say(ended ? 'End of the tape. Press play to hear it again, or pick another.' : 'Paused from the Spotify strip.');
+    if (ended) { try { ctrl.seek(0); } catch (e) {} }
+  }
+}
+function spPlay() {
+  lastCmd = performance.now(); if (!ctrl) return;
+  try { (fresh || !ctrl.resume) ? ctrl.play() : ctrl.resume(); } catch (e) { try { ctrl.play(); } catch (x) {} }
+  // some browsers (iPhone Safari above all) will not let a page start Spotify on its own; ask for one tap instead
+  const t = (starting = performance.now()), s = current;
+  setTimeout(() => {
+    if (starting !== t || current !== s) return;
+    starting = 0; source.classList.add('nudge'); say('Spotify needs one tap: press <b>play</b> in the Spotify strip below.');
+    if (state.playing) { press('PLAY', false); reels(false); state.playing = false; }
+  }, 3500);
+}
+function spPause() { lastCmd = performance.now(); starting = 0; source.classList.remove('nudge'); if (ctrl) try { ctrl.pause(); } catch (e) {} }
+function spLoad(album) { lastCmd = performance.now(); fresh = true; starting = 0; if (ctrl) try { ctrl.loadUri('spotify:album:' + album); } catch (e) {} }
+function spSeek(delta) { if (!ctrl) return; lastCmd = performance.now(); const now = spot.pos + (spot.paused ? 0 : performance.now() - spot.at); const to = Math.max(0, Math.min((spot.dur || 1e9) - 1000, now + delta)); try { ctrl.seek(to / 1000); } catch (e) {} spot.pos = to; spot.at = performance.now(); roCount.textContent = pad3(to / 1000); }
+
+/* ── the deck ── */
+const state = { door: 'closed', tape: null, playing: false };
+let current = null, busy = false, want = null;
+const songOf = (n) => SONGS.find((s) => s.n === n);
+const SEQ = (n) => MF.songs[n];
+let reelTimer = null, reelI = 0, reelDir = 1, reelFps = 14;
+function reels(on, fps = 14, dir = 1) {
+  reelFps = fps; reelDir = dir;
+  if (!on) { clearTimeout(reelTimer); reelTimer = null; view.reel = -1; repaint(); return; }
+  if (reelTimer) return;
+  const tick = () => { reelI = (reelI + reelDir + MF.reel.n) % MF.reel.n; view.reel = reelI; repaint(); reelTimer = setTimeout(tick, 1000 / reelFps); };
+  tick();
+}
+function press(k, down) { view.keys[k] = down; const b = keyBtn[k]; if (b && k === 'PLAY') b.setAttribute('aria-pressed', String(!!down)); repaint(); }
+async function tap(k, ms = 160) { SFX.keyDown(); press(k, true); await sleep(ms); press(k, false); SFX.keyUp(); }
+function setPlaying(on, fromSpotify) {
+  state.playing = on;
+  if (on) { if (!view.keys.PLAY) { if (!fromSpotify) SFX.keyDown(); else SFX.latch(); } press('PLAY', true); reels(true); if (!fromSpotify) motor(0.05); say('Playing <b>' + esc(current.title) + '</b>.'); }
+  else { press('PLAY', false); reels(false); if (fromSpotify) SFX.keyUp(); }
+}
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function openDoor() {
+  if (state.door === 'open') return;
+  SFX.keyDown(); press('EJECT', true);
+  await play(MF.open, { cues: { 1: () => { SFX.doorPop(); }, 4: () => { press('EJECT', false); SFX.keyUp(); } } });
+  state.door = 'open';
+}
+async function closeEmpty() {
+  if (state.door !== 'open' || state.tape) return;
+  await play(MF.open, { from: MF.open.n - 1, to: 0, fps: 30, cues: { 1: () => SFX.slam() } });
+  state.door = 'closed'; view.base = MF.idle; view.seq = null; repaint();
+}
+async function insert(n) {
+  const s = songOf(n), seq = SEQ(n);
+  current = s; state.tape = n; markRack();
+  roTitle.textContent = 'Tape ' + String(n).padStart(3, '0') + ' // ' + s.title; roCount.textContent = '000'; roBar.style.width = '0';
+  spOpen.href = 'https://open.spotify.com/album/' + s.album;
+  spNote.textContent = 'Logged in to Spotify in this browser? You hear the whole track. If not, Spotify plays a 30-second preview.';
+  say('Loading tape ' + String(n).padStart(3, '0') + '.');
+  const api = spotify().then((c) => { if (c && current === s) spLoad(s.album); return c; });
+  trim([seq.sheet]); const ready = loadSeq(seq);
+  let slow = 0; const wait = ready.then(() => { clearTimeout(slow); veil.hidden = true; });
+  slow = setTimeout(() => { veil.textContent = 'Winding tape ' + String(n).padStart(3, '0'); veil.hidden = false; }, 350);
+  if (state.door !== 'open') { await Promise.all([openDoor(), wait]); } else await wait;
+  await play(seq, { cues: { 1: SFX.tapeIn, 21: SFX.seat, 33: SFX.slam } });
+  state.door = 'closed';
+  await sleep(180);
+  const c = await api;
+  if (current !== s) return;
+  if (!c) { spFail(); return; }
+  if (current !== s) return;
+  setPlaying(true, false); spPlay();
+}
+async function eject() {
+  if (!state.tape) { if (state.door === 'open') await closeEmpty(); else await openDoor(); say(state.door === 'open' ? 'Door open. Pick a tape.' : 'Pick a tape from the rack.'); return; }
+  const n = state.tape, seq = SEQ(n);
+  if (state.playing || view.keys.PLAY) { spPause(); setPlaying(false, false); }
+  SFX.keyDown(); press('EJECT', true);
+  await play(seq, { from: 35, to: 24, fps: 30, cues: { 34: SFX.doorPop, 31: () => { press('EJECT', false); SFX.keyUp(); } } });
+  await play(seq, { from: 24, to: 0, fps: 30, cues: { 23: SFX.tapeOut } });
+  hold(MF.open, MF.open.n - 1); await paint();
+  state.tape = null; state.door = 'open'; const old = current; current = null; markRack(old.n);
+  roTitle.textContent = 'No tape in the deck'; roCount.textContent = '000'; roBar.style.width = '0'; source.classList.remove('nudge');
+  say('Tape ' + String(old.n).padStart(3, '0') + ' is back in the rack. Pick another, or press eject to close the door.');
+}
+// one action at a time; the last thing asked for wins
+async function run(fn) {
+  if (busy) { want = fn; return; }
+  busy = true; setBusy(true);
+  try { await fn(); } catch (e) { console.error(e); }
+  busy = false; setBusy(false);
+  if (want) { const w = want; want = null; run(w); }
+}
+async function load(n) {
+  audio();
+  if (state.tape === n) { if (!state.playing) { setPlaying(true, false); spPlay(); } return; }
+  if (state.tape) await eject();
+  await insert(n);
+}
+
+/* ── hot spots over the keys and door ── */
+const tipEl = document.createElement('span'); tipEl.className = 'tip'; tipEl.setAttribute('aria-hidden', 'true'); hot.appendChild(tipEl);
+function tipFor(b, text) {
+  const on = () => { tipEl.textContent = text.toUpperCase(); tipEl.style.left = (parseFloat(b.style.left) + parseFloat(b.style.width) / 2) + '%'; tipEl.style.top = b.style.top; tipEl.classList.add('on'); };
+  const off = () => tipEl.classList.remove('on');
+  b.addEventListener('pointerenter', on); b.addEventListener('focus', on); b.addEventListener('pointerleave', off); b.addEventListener('blur', off); b.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') setTimeout(off, 700); });
+}
+const keyBtn = {}, LABELS = { REC: 'Record', PLAY: 'Play', REW: 'Rewind', FF: 'Fast-forward', STOP: 'Stop', EJECT: 'Eject' };
+const pct = (v, of) => (v / of) * 100 + '%';
+function placeBtn(b, box, clip) { b.style.left = pct(box[0], MF.W); b.style.top = pct(box[1], MF.H); b.style.width = pct(box[2], MF.W); b.style.height = pct(box[3], MF.H); if (clip) b.style.clipPath = 'polygon(' + clip.split(' ').reduce((a, v, i, arr) => (i % 2 ? a : a.concat(v + ' ' + arr[i + 1])), []).join(',') + ')'; }
+for (const k of ['REC', 'PLAY', 'REW', 'FF', 'STOP', 'EJECT']) {
+  const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', LABELS[k]); if (k === 'PLAY') b.setAttribute('aria-pressed', 'false');
+  placeBtn(b, MF.keys[k].hit, MF.keys[k].clip); hot.appendChild(b); keyBtn[k] = b; tipFor(b, LABELS[k]);
+}
+const doorBtn = document.createElement('button'); doorBtn.type = 'button'; doorBtn.className = 'door'; doorBtn.setAttribute('aria-label', 'Cassette door: open or eject');
+placeBtn(doorBtn, MF.door, MF.doorClip); hot.appendChild(doorBtn); tipFor(doorBtn, 'Door');
+
+keyBtn.PLAY.addEventListener('click', () => run(async () => {
+  audio();
+  if (!state.tape) { await tap('PLAY'); say('No tape in the deck. Pick one from the rack.'); return; }
+  if (state.playing) return;
+  if (!ctrl) { say('Connecting to Spotify.'); const c = await spotify(); if (!c) { await tap('PLAY'); spFail(); return; } spLoad(current.album); await sleep(600); }
+  setPlaying(true, false); spPlay(); source.classList.remove('nudge');
+}));
+keyBtn.STOP.addEventListener('click', () => run(async () => {
+  audio(); const was = state.playing || view.keys.PLAY;
+  await tap('STOP', 140);
+  if (was) { spPause(); setPlaying(false, false); SFX.keyUp(); say('Stopped. Press play to carry on.'); }
+}));
+keyBtn.EJECT.addEventListener('click', () => run(async () => { audio(); await eject(); }));
+doorBtn.addEventListener('click', () => run(async () => { audio(); await eject(); }));
+keyBtn.REC.addEventListener('click', () => run(async () => {
+  audio(); SFX.keyDown(); press('REC', true); await sleep(260); SFX.denied(); await sleep(260); press('REC', false); SFX.keyUp();
+  say('Side A is sealed. <b>Side B is yours to fill:</b> <a href="/casting/">the Casting Room</a>.');
+}));
+// rewind / fast-forward: momentary keys, hold to keep winding
+for (const [k, dir] of [['REW', -1], ['FF', 1]]) {
+  const b = keyBtn[k]; let timer = null, held = false, wasPlaying = false;
+  const start = (e) => {
+    if (e) e.preventDefault(); if (held || busy) return; held = true; audio(); SFX.keyDown(); press(k, true);
+    if (!state.tape) return;
+    wasPlaying = state.playing; reels(false); reels(true, 40, dir); whirr(true, 1.3);
+    spSeek(dir * 10000); timer = setInterval(() => spSeek(dir * 10000), 420);
+  };
+  const stop = () => {
+    if (!held) return; held = false; clearInterval(timer); whirr(false); press(k, false); SFX.keyUp();
+    if (!state.tape) return; reels(false); if (wasPlaying || state.playing) reels(true, 14, 1);
+    say((dir < 0 ? 'Rewound' : 'Wound forward') + ' to ' + mmss(spot.pos) + '.');
+  };
+  b.addEventListener('pointerdown', start); b.addEventListener('pointerup', stop); b.addEventListener('pointerleave', stop); b.addEventListener('pointercancel', stop);
+  b.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) start(e); });
+  b.addEventListener('keyup', (e) => { if (e.key === 'Enter' || e.key === ' ') stop(); });
+  b._start = start; b._stop = stop;
+}
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input,textarea,select,[contenteditable]') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.closest('.hot button,.tape,.sfx,a') && (e.key === ' ' || e.key === 'Enter')) return;
+  if (e.key === ' ') { e.preventDefault(); (state.playing ? keyBtn.STOP : keyBtn.PLAY).click(); }
+  else if (e.key === 'e' || e.key === 'E') keyBtn.EJECT.click();
+  else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.repeat) { e.preventDefault(); keyBtn[e.key === 'ArrowLeft' ? 'REW' : 'FF']._start(); }
+});
+document.addEventListener('keyup', (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keyBtn[e.key === 'ArrowLeft' ? 'REW' : 'FF']._stop(); });
+
+/* ── the rack ── */
+const list = $('#tapes'), rackBtn = {};
+for (const s of SONGS) {
+  const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button'; b.className = 'tape';
+  b.style.setProperty('--ac', s.accent.join(','));
+  b.setAttribute('aria-label', 'Load tape ' + s.n + ': ' + s.title + ', ' + s.year);
+  b.innerHTML = '<span class="shot"><img src="' + base + 't/tape_' + String(s.n).padStart(2, '0') + '.webp" alt="" width="760" height="520" loading="lazy" decoding="async"></span>' +
+    '<span class="n">TAPE // ' + String(s.n).padStart(3, '0') + '</span><span class="t">' + esc(s.title) + '</span><span class="m">' + s.year + ' · <em>' + esc(s.note) + '</em></span>';
+  b.addEventListener('click', () => run(() => load(s.n)));
+  let hv = 0; const pre = () => { if (!busy) { trim([SEQ(s.n).sheet, state.tape ? SEQ(state.tape).sheet : '']); loadSeq(SEQ(s.n)); } };
+  b.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hv = setTimeout(pre, 280); });
+  b.addEventListener('pointerleave', () => clearTimeout(hv));
+  b.addEventListener('focus', pre);
+  b.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse' && !busy) loadSeq(SEQ(s.n)); });
+  li.appendChild(b); list.appendChild(li); rackBtn[s.n] = b;
+}
+function markRack(back) {
+  for (const s of SONGS) { const b = rackBtn[s.n]; b.classList.toggle('out', state.tape === s.n); b.classList.remove('back'); b.setAttribute('aria-current', state.tape === s.n ? 'true' : 'false'); }
+  if (back && rackBtn[back]) { void rackBtn[back].offsetWidth; rackBtn[back].classList.add('back'); }
+}
+function setBusy(on) { for (const s of SONGS) rackBtn[s.n].setAttribute('aria-disabled', on ? 'true' : 'false'); }
+
+/* ── start: draw the deck, then warm the shared frames ── */
+veil.hidden = false;
+img(MF.idle).then(() => { veil.hidden = true; repaint(); });
+const warm = () => { loadSeq(MF.open); img(MF.keysImg.src); img(MF.reel.sheet); img('f/open.webp'); };
+('requestIdleCallback' in window) ? requestIdleCallback(warm, { timeout: 2500 }) : setTimeout(warm, 1200);
+const q = new URLSearchParams(location.search).get('tape'); if (q && songOf(+q)) rackBtn[+q].focus({ preventScroll: true });
+})();
+</script>
+</body>
+</html>
