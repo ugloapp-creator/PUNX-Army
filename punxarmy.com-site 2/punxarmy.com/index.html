@@ -605,7 +605,7 @@ body:has(#init.on) #rail{background:linear-gradient(#0A0A0A 72%,rgba(10,10,10,.8
   <div id="ytitle" aria-hidden="true"><span class="a"></span><span class="b"><span class="rule"></span><span class="t"></span></span><span class="c"><span class="t"></span></span></div>
   <aside id="yfile" aria-hidden="true"><span class="hd">archive file 001 // subject</span>
     <div class="tt"><b>● REC</b><video id="yturn" muted playsinline loop preload="none"><source src="/video/yesop-file.mp4" type="video/mp4"><source src="/video/yesop-file.webm" type="video/webm"></video></div>
-    <dl><dt>name</dt><dd data-t="YESOP"></dd><dt>role</dt><dd data-t="THE SIGNAL-BEARER"></dd><dt>origin</dt><dd data-t="ATLANTA"></dd><dt>status</dt><dd class="g" data-t="TRANSMITTING"></dd><dt>carries</dt><dd data-t="THE SIGNAL"></dd></dl>
+    <dl><dt>name</dt><dd data-t="YESOP"></dd><dt>role</dt><dd data-t="THE SIGNAL-BEARER"></dd><dt>origin</dt><dd data-t="QUEENS"></dd><dt>status</dt><dd class="g" data-t="TRANSMITTING"></dd><dt>carries</dt><dd data-t="THE SIGNAL"></dd></dl>
   </aside>
   <button id="halo" aria-label="Hold to brighten the Halo"><svg viewBox="0 0 100 100"><circle class="ring0" cx="50" cy="50" r="48"/><circle cx="50" cy="50" r="48" style="--len:301.6"/></svg></button>
   <section id="choice" aria-labelledby="q">
@@ -662,6 +662,7 @@ body:has(#init.on) #rail{background:linear-gradient(#0A0A0A 72%,rgba(10,10,10,.8
         </div>
       </div>
       <footer class="small">
+        <a class="b3 sm" href="/tapes/">Archive Tapes</a>
         <a class="b3 sm" href="/rights/">Rights</a>
         <a class="b3 sm" href="/privacy/">Privacy</a>
         <a class="b3 sm" href="/terms/">Terms</a>
@@ -688,7 +689,7 @@ body:has(#init.on) #rail{background:linear-gradient(#0A0A0A 72%,rgba(10,10,10,.8
     <div id="loadbar" aria-hidden="true"><i></i></div>
     <button class="b3 chrome" id="begin">Begin</button>
     <small>Sound only starts if you turn it on. Headphones recommended.</small>
-    <nav><a class="b3 sm" href="/casting/">The Casting Room</a><a class="b3 sm" href="/rights/">Rights</a></nav>
+    <nav><a class="b3 sm" href="/tapes/">Archive Tapes</a><a class="b3 sm" href="/casting/">The Casting Room</a><a class="b3 sm" href="/rights/">Rights</a></nav>
     <p class="legal">No ads, nothing sold. <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · <a href="/privacy/#choices" data-cookie-settings>Cookie settings</a></p>
   </div>
 </section>
@@ -1107,7 +1108,9 @@ function glitchBurst(ms=500,k=.6,{him=false}={}){if(reduce)return Promise.resolv
   const yv=$('#glimpse video');const t0=performance.now();const FR=new Map();
   function grab(src){let c=FR.get(src);if(!c){c=document.createElement('canvas');c.width=W;c.height=H;FR.set(src,c)}const m=cover(src);if(!m)return null;try{c.getContext('2d').drawImage(src,0,0,m.sw,m.sh,m.ox,m.oy,m.sw*m.sc,m.sh*m.sc)}catch(e){return null}return c}
   function cover(src){const sw=src.videoWidth,sh=src.videoHeight;if(!sw)return null;const sc=Math.max(W/sw,H/sh);return{sw,sh,sc,ox:(W-sw*sc)/2,oy:(H-sh*sc)/2}}
-  (function f(now){if(id!==gfxId)return res();const t=now-t0;gq.clearRect(0,0,W,H);const fv=cur&&cur.readyState>=2?grab(cur):null,hv=him&&yv.readyState>=2?grab(yv):null;
+  // the films run at about 30 fps, so copy a fresh frame of them every other paint only
+  let fn=0,fv=null,hv=null;
+  (function f(now){if(id!==gfxId)return res();const t=now-t0;gq.clearRect(0,0,W,H);if(!(fn++&1)||!fv){fv=cur&&cur.readyState>=2?grab(cur):null;hv=him&&yv.readyState>=2?grab(yv):null}
     const n=5+Math.random()*16*k|0;
     for(let i=0;i<n;i++){const y=Math.random()*H|0,h=Math.max(1,(1+Math.random()*H*.1*k)|0),dx=(Math.random()-.5)*W*.4*k|0;
       const src=(hv&&Math.random()<.5)?hv:fv;
@@ -1179,7 +1182,8 @@ function staticField(){const c=$('#static'),x=c.getContext('2d');
       if(u[p]===0){if(filling){if(dm[p]<=th+(q*jit-.035))continue}else if(q!==0)continue}
       u[p]=(filling&&dm[p]<th+.03)?FRONT:GR[RT[(r*7)&(RN-1)]]}
     x.putImageData(img,0,0)}
-  (function loop(){if(!alive)return;requestAnimationFrame(loop);if(frozen||(reduce&&!filling))return;paint()})();
+  // TV static reads the same at 30 fps as at 60, for half the work
+  let lastP=0;(function loop(now){if(!alive)return;requestAnimationFrame(loop);if(frozen||(reduce&&!filling))return;if(now&&now-lastP<30)return;lastP=now||0;paint()})();
   function fill(ms){return new Promise(res=>{if(!ms){th=-1;paint();filling=false;return res()}const t0=performance.now();
     (function f(now){const k=Math.min(1,(now-t0)/ms),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;th=1.05-1.12*e;if(k<1)requestAnimationFrame(f);else{th=-1;paint();filling=false;res()}})(t0)})}
   function stop(){alive=false;c.onpointerdown=c.onpointermove=c.onpointerup=null;c.classList.remove('on','tear','tearbig');c.style.opacity=''}

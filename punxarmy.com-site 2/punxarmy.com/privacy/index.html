@@ -19,7 +19,7 @@
 <main class="wrap doc">
   <p class="kicker">ARCHIVE 001 // THE RECORD OF WHAT WE KEEP</p>
   <h1 class="display" style="font-size:clamp(2.2rem,9vw,4rem)">Privacy</h1>
-  <p class="quiet">Last updated October 19, 2026</p>
+  <p class="quiet">Last updated October 29, 2026</p>
   <p class="lead">The archive keeps clothes, references and the people who make them. It does not keep tabs on you. Here is exactly what we collect, why, who helps us handle it, how long it stays, and how to see or delete it.</p>
 
   <h2 style="margin-top:2rem">The short version</h2>
@@ -79,10 +79,11 @@
       <tr><td data-label="Saved item"><code>punx_code</code>, <code>punx_code_seen_…</code></td><td data-label="What it holds">Your personal signal code</td><td data-label="Used for">Your share links and your link into the Discord room</td></tr>
       <tr><td data-label="Saved item"><code>punx_carried</code></td><td data-label="What it holds">Which of the final three actions you completed</td><td data-label="Used for">Showing what you already carried</td></tr>
       <tr><td data-label="Saved item"><code>punx_passport</code></td><td data-label="What it holds">Your Passport number (PP-XXXXXX) after an entry</td><td data-label="Used for">Keeping one Passport across your two entries</td></tr>
+      <tr><td data-label="Saved item"><code>punx_deck_sfx</code></td><td data-label="What it holds">Whether you turned the tape deck's sounds off</td><td data-label="Used for">Keeping the deck quiet on your next visit</td></tr>
       <tr><td data-label="Saved item"><code>punx_consent</code></td><td data-label="What it holds">Your cookie choice and when you made it</td><td data-label="Used for">Remembering your answer for 12 months</td></tr>
     </tbody>
   </table></div>
-  <p><b>Third parties on page load.</b> The initiation page loads one handwriting typeface from Google Fonts, so Google receives your IP address and browser details when that page loads (<a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a>). Every other font is hosted by us. If you allow analytics, Google Analytics loads and receives the data described in section 2 (<a href="https://business.safety.google/privacy/" rel="noopener">how Google uses it</a>). When you join the email list, your sign-up is sent to Kit, our email provider. Nothing else on the site contacts a third party until you click a link to Instagram, TikTok, Spotify, Apple Music, SoundCloud, YouTube or Discord. Those sites then apply their own privacy policies.</p>
+  <p><b>Third parties on page load.</b> The initiation page loads one handwriting typeface from Google Fonts, so Google receives your IP address and browser details when that page loads (<a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a>). Every other font is hosted by us. If you allow analytics, Google Analytics loads and receives the data described in section 2 (<a href="https://business.safety.google/privacy/" rel="noopener">how Google uses it</a>). When you join the email list, your sign-up is sent to Kit, our email provider. On <a href="/tapes/">Archive Tapes</a>, Spotify's embedded player loads only when you put a tape in the deck. From then on Spotify receives your IP address and browser details, can see whether you are logged in to Spotify in this browser, and may set its own cookies, under <a href="https://www.spotify.com/legal/privacy-policy/" rel="noopener">Spotify's privacy policy</a>. We never see your Spotify account. The deck remembers only whether you turned its sounds off (<code>punx_deck_sfx</code>, on this device). Nothing else on the site contacts a third party until you click a link to Instagram, TikTok, Spotify, Apple Music, SoundCloud, YouTube or Discord. Those sites then apply their own privacy policies.</p>
 
   <section id="choices" class="callout" aria-labelledby="choices-h">
     <h3 id="choices-h" style="margin-top:0">Your privacy choices on this device</h3>
@@ -123,6 +124,7 @@
       <tr><td data-label="Provider">Kit (ConvertKit)</td><td data-label="What they do for us">Stores the email list and sends our emails</td></tr>
       <tr><td data-label="Provider">Discord</td><td data-label="What they do for us">Hosts the server</td></tr>
       <tr><td data-label="Provider">Anthropic</td><td data-label="What they do for us">Writes the Archivist's answers to talking commands</td></tr>
+      <tr><td data-label="Provider">Spotify</td><td data-label="What they do for us">Streams the music on Archive Tapes through its own embedded player, only after you load a tape</td></tr>
       <tr><td data-label="Provider">Google Fonts</td><td data-label="What they do for us">Serves one typeface on the initiation page</td></tr>
       <tr><td data-label="Provider">Google Analytics</td><td data-label="What they do for us">Measures how the site is used, only for visitors who allow it</td></tr>
       <tr><td data-label="Provider">Contest judges</td><td data-label="What they do for us">See entry content only (handle, post, look details), never follower counts or other metrics</td></tr>
@@ -181,7 +183,7 @@
   <p>Yesop LLC, a Georgia limited liability company (mailing address available on request). Email: <a href="mailto:booking@punxarmy.com">booking@punxarmy.com</a>.</p>
 
   <footer class="bottom">
-    <nav aria-label="Site"><a href="/">The initiation</a><a href="/casting/">The Casting Room</a><a href="/casting/rules/">Official rules</a><a href="/rights/">Rights &amp; credits</a><a href="/privacy/">Privacy</a><a href="/privacy/#storage">Cookies &amp; storage</a><a href="/privacy/#choices" data-cookie-settings>Cookie settings</a><a href="/terms/">Terms</a></nav>
+    <nav aria-label="Site"><a href="/">The initiation</a><a href="/tapes/">Archive tapes</a><a href="/casting/">The Casting Room</a><a href="/casting/rules/">Official rules</a><a href="/rights/">Rights &amp; credits</a><a href="/privacy/">Privacy</a><a href="/privacy/#storage">Cookies &amp; storage</a><a href="/privacy/#choices" data-cookie-settings>Cookie settings</a><a href="/terms/">Terms</a></nav>
     <p>PUNX ARMY is the campaign world of YESOP. No ads, nothing sold, and analytics cookies only if you say yes.</p>
     <p>Not sponsored, endorsed or administered by, or associated with, Instagram, TikTok or Discord.</p>
   </footer>
