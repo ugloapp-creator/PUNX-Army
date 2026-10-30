@@ -28,7 +28,7 @@
   # img-src / media-src: every image, clip and the song are files on this
   #   origin. data: and blob: are kept because the Archive File is drawn on a
   #   canvas and handed to the visitor as an image.
-  # Spotify (open.spotify.com): /tapes/ only. Spotify's embed script and its
+  # Spotify (open.spotify.com, embed-cdn.spotifycdn.com): /tapes/ only. Spotify's embed script and its
   #   player iframe load the moment a visitor puts a tape in the deck, never
   #   on page load. Disclosed on /privacy. Drop both if /tapes/ ever goes.
   # frame-ancestors 'none': this page may not be framed by anyone, which is
@@ -38,7 +38,7 @@
   #   to this site (Netlify Forms). Nothing may submit a form anywhere else.
   # base-uri 'none': stops an injected <base> from re-pointing relative URLs.
   # object-src 'none': no Flash/Java/plugin surface at all.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://open.spotify.com; frame-src https://open.spotify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com; media-src 'self' data: blob:; connect-src 'self' https://app.kit.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://open.spotify.com https://embed-cdn.spotifycdn.com; frame-src https://open.spotify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com; media-src 'self' data: blob:; connect-src 'self' https://app.kit.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
 
   # --- Transport ----------------------------------------------------------
   # Two years, subdomains included. This is what enforces https: a browser
