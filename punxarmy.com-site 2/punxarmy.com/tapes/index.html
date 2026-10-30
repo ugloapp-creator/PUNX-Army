@@ -24,11 +24,13 @@
 body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,.07),transparent 70%),radial-gradient(ellipse 90% 40% at 50% 0%,rgba(166,255,0,.04),transparent 70%)}
 .deck{width:min(78rem,100%);margin:0 auto;padding:0 max(1rem,env(safe-area-inset-left)) 3rem max(1rem,env(safe-area-inset-right))}
 .deck .kicker{margin-top:1rem}
-.deck h1.display{font-size:clamp(2.3rem,5.2vw,3.9rem)}
+.deck h1.display{font-size:clamp(2rem,min(5.2vw,7vh),3.9rem)}
+.deck .intro .sub{font-size:clamp(.9rem,min(2.2vw,2.6vh),1.35rem)}
+@media (max-height:820px) and (min-width:901px){.deck .kicker{margin:.6rem 0 .4rem}.source .note{font-size:.66rem;margin-top:.3rem}}
 .intro{min-width:0}
 .intro .sub{margin-top:.4rem}
-.stage{display:grid;gap:.9rem 2.4rem;margin-top:.6rem;grid-template-columns:auto minmax(18rem,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;
-  grid-template-areas:"player intro" "player readout" "player rack" "player source";height:calc(100svh - 3.4rem);min-height:36rem}
+.stage{display:grid;gap:.9rem 2.4rem;margin-top:.6rem;grid-template-columns:auto minmax(18rem,1fr);grid-template-rows:auto auto minmax(16.5rem,1fr) auto;
+  grid-template-areas:"player intro" "player readout" "player rack" "player source";height:max(calc(100svh - 3.4rem),44rem)}
 .stage>.intro{grid-area:intro}.stage>.player{grid-area:player;display:flex;flex-direction:column;min-height:0}.stage>.readout{grid-area:readout}.stage>.rack{grid-area:rack}.stage>.source{grid-area:source}
 /* ── the player ── */
 .player{position:relative;min-width:0}
@@ -75,15 +77,15 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
 .rack{min-width:0;display:flex;flex-direction:column;min-height:0}
 .rack h2{margin:0 0 .15rem;font-size:1.1rem}
 .rack .hint{font-size:.7rem;color:var(--stone);margin:0 0 .55rem}
-.rack ol{list-style:none;display:grid;align-content:start;gap:.5rem;flex:1;min-height:0;overflow-y:auto;padding:.2rem .5rem .6rem .2rem;scrollbar-width:thin;scrollbar-color:#3a3a38 transparent}
-.tape{all:unset;box-sizing:border-box;display:grid;grid-template-columns:7.2rem 1fr;gap:.2rem .9rem;align-items:center;width:100%;padding:.45rem .7rem .45rem .45rem;cursor:pointer;
+.rack ol{list-style:none;display:grid;align-content:start;gap:.4rem;flex:1;min-height:0;overflow-y:auto;padding:.2rem .5rem .6rem .2rem;scrollbar-width:thin;scrollbar-color:#3a3a38 transparent}
+.tape{all:unset;box-sizing:border-box;display:grid;grid-template-columns:5.4rem 1fr;gap:.05rem .8rem;align-items:center;width:100%;padding:.3rem .7rem .3rem .4rem;cursor:pointer;
   background:linear-gradient(90deg,var(--asphalt2),rgba(18,18,17,.6));border:1px solid var(--line);border-left:3px solid rgb(var(--ac));border-radius:4px;transition:border-color .2s,background .2s,transform .15s}
 .tape:hover{background:var(--asphalt3);transform:translateX(-3px)}
 .tape:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
 .tape .shot{position:relative;grid-row:1/4;aspect-ratio:760/520;transition:transform .45s cubic-bezier(.3,.7,.2,1),opacity .35s}
 .tape .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
 .tape .n{font:600 .58rem var(--f-mono);letter-spacing:.24em;color:var(--stone)}
-.tape .t{font-family:var(--f-clean);font-size:1.12rem;line-height:1.05;text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+.tape .t{font-family:var(--f-clean);font-size:1.02rem;line-height:1.05;text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
 .tape .m{font-size:.68rem;color:var(--stone);line-height:1.3}
 .tape .m em{font-style:normal;color:rgb(var(--ac))}
 .tape.out .shot{transform:translateX(-140%) rotate(-6deg) scale(.9);opacity:0}
@@ -104,13 +106,12 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
   .below{grid-template-columns:1fr}
 }
 @media (hover:none){.controls-help>span{display:none}.controls-help{justify-content:flex-end}}
-@media (min-width:901px) and (max-height:640px){.stage{height:auto}.frame{height:auto;width:min(100%,34rem)}}
 </style>
 </head>
 <body>
 <header class="top"><a href="/">PUNX ARMY</a><span>Archive Tapes</span></header>
 <main class="deck">
-  <div class="stage">
+  <div class="stage" data-fold-consent>
   <div class="intro">
     <div>
       <p class="kicker">ARCHIVE 001 // RECOVERED SIGNALS // YESOP</p>

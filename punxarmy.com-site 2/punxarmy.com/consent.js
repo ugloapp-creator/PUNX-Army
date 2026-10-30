@@ -139,7 +139,12 @@
     if (p) storagePanel(p);
     const a = read();
     if (a === 'granted') load();
-    else if (enabled && !a && !gpc && !document.querySelector('[data-no-notice]')) { show(); watchGate(); }
+    else if (enabled && !a && !gpc && !document.querySelector('[data-no-notice]')) {
+      show(); watchGate();
+      // pages with something to play (the tape deck): the first press folds the popup out of the way
+      const fz = document.querySelector('[data-fold-consent]');
+      if (fz) fz.addEventListener('pointerdown', (e) => { if (!e.target.closest('.pcx')) setTimeout(fold, 50); }, { once: true });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();
