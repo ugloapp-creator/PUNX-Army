@@ -386,17 +386,20 @@ function startEarly(s) {
   early = null;
   if (!WEBKIT || busy || state.tape === s.n) return;
   const p = players.find((x) => x.cur() === uriOf(s.album) && x.isReady()); if (!p || p === ctrl) return;
-  p.hold = true; p.play(); p.pause(); early = { p, album: s.album };
+  // keep it silent until the tape is seated: Spotify ignores a pause that arrives before it has started, so keep asking
+  p.hold = true; p.play(); p.pause(); clearInterval(p.holdT); p.holdT = setInterval(() => p.pause(), 40); setTimeout(() => clearInterval(p.holdT), 4000);
+  early = { p, album: s.album };
 }
 function onSpot(e) {
   const d = e.data || {}; spot = { paused: d.isPaused, pos: d.position || 0, dur: d.duration || 0, buf: d.isBuffering, at: performance.now() };
+  if (spot.pos !== lastPos) { lastPos = spot.pos; lastMove = performance.now(); }
   if (!current) return;
   if (spot.dur) { roBar.style.width = Math.min(100, (spot.pos / spot.dur) * 100) + '%'; roCount.textContent = pad3(spot.pos / 1000); }
   if (spot.dur && spot.dur < 31500) spNote.textContent = 'Spotify is playing a 30-second preview. Log in to Spotify in this browser to hear the whole track.';
   if (!current || busy) return;
   const quiet = performance.now() - lastCmd < 1500;
   if (!d.isPaused && !d.isBuffering) { starting = 0; fresh = false; }
-  if (!d.isPaused && !d.isBuffering && !state.playing) { source.classList.remove('nudge'); setPlaying(true, true); }
+  if (!d.isPaused && !d.isBuffering && !state.playing && performance.now() - lastMove < 1500 && lastPos > 0) { source.classList.remove('nudge'); setPlaying(true, true); }
   else if (d.isPaused && state.playing && !quiet && !starting && !d.isBuffering) {
     const ended = spot.dur && spot.pos >= spot.dur - 1200;
     setPlaying(false, true); say(ended ? 'End of the tape. Press play to hear it again, or pick another.' : 'Paused from the Spotify strip.');
@@ -433,8 +436,20 @@ function reels(on, fps = 14, dir = 1) {
 }
 function press(k, down) { view.keys[k] = down; const b = keyBtn[k]; if (b && k === 'PLAY') b.setAttribute('aria-pressed', String(!!down)); repaint(); }
 async function tap(k, ms = 160) { SFX.keyDown(); press(k, true); await sleep(ms); press(k, false); SFX.keyUp(); }
+// trust the music, not the message: if the song position has not moved for 4 s while the deck says it is playing,
+// Spotify was not allowed to start (Safari, no click) or stalled. Pop PLAY up and ask for one tap; it heals itself
+// the moment Spotify really plays.
+let lastPos = -1, lastMove = 0;
+setInterval(() => {
+  if (!state.playing || busy || !current) return;
+  const now = performance.now();
+  if (now - lastMove > 4000 && now - lastCmd > 4000) {
+    state.playing = false; press('PLAY', false); reels(false); starting = 0;
+    source.classList.add('nudge'); say('Spotify needs one tap: press <b>play</b> in the Spotify strip below.');
+  }
+}, 1000);
 function setPlaying(on, fromSpotify) {
-  state.playing = on;
+  state.playing = on; if (on) lastMove = performance.now();
   if (on) { if (!view.keys.PLAY) { if (!fromSpotify) SFX.keyDown(); else SFX.latch(); } press('PLAY', true); reels(true); if (!fromSpotify) motor(0.05); say('Playing <b>' + esc(current.title) + '</b>.'); }
   else { press('PLAY', false); reels(false); if (fromSpotify) SFX.keyUp(); }
 }
@@ -470,7 +485,7 @@ async function insert(n) {
   await sleep(180);
   if (current !== s) return;
   setPlaying(true, false);
-  if (fromEarly) { sp.hold = false; fresh = false; try { sp.seek(0); } catch (e) {} spPlay(); } else spPlay();
+  if (fromEarly) { clearInterval(sp.holdT); sp.hold = false; fresh = false; try { sp.seek(0); } catch (e) {} spPlay(); } else spPlay();
 }
 async function eject() {
   if (!state.tape) { if (state.door === 'open') await closeEmpty(); else await openDoor(); say(state.door === 'open' ? 'Door open. Pick a tape.' : 'Pick a tape from the rack.'); return; }
@@ -572,7 +587,7 @@ for (const s of [...SONGS].reverse()) {
     '<span class="n">TAPE // ' + String(s.n).padStart(3, '0') + '</span><span class="t">' + esc(s.title) + '</span><span class="m">' + s.year + ' · <em>' + esc(s.note) + '</em></span>';
   b.addEventListener('click', () => { audio(); startEarly(s); run(() => load(s.n)); });
   let hv = 0; const pre = () => { if (!busy) { trim([SEQ(s.n).sheet, state.tape ? SEQ(state.tape).sheet : '']); loadSeq(SEQ(s.n)); warm(s.album); } };
-  b.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hv = setTimeout(pre, 280); });
+  b.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hv = setTimeout(pre, 120); });
   b.addEventListener('pointerleave', () => clearTimeout(hv));
   b.addEventListener('focus', pre);
   b.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse' && !busy) loadSeq(SEQ(s.n)); });
@@ -591,6 +606,8 @@ const warmFrames = () => { loadSeq(MF.open); img(MF.keysImg.src); img(MF.reel.sh
 ('requestIdleCallback' in window) ? requestIdleCallback(warmFrames, { timeout: 2500 }) : setTimeout(warmFrames, 1200);
 // touch screens have no hover: the first touch on the page warms the newest tape, the one most people pick
 addEventListener('touchstart', () => warm(SONGS[SONGS.length - 1].album), { once: true, passive: true });
+// with a mouse, the first movement on the page warms the newest tape too
+addEventListener('mousemove', () => warm(SONGS[SONGS.length - 1].album), { once: true, passive: true });
 const q = new URLSearchParams(location.search).get('tape'); if (q && songOf(+q)) rackBtn[+q].focus({ preventScroll: true });
 })();
 </script>
