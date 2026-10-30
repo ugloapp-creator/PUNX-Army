@@ -59,23 +59,24 @@
   Cross-Origin-Resource-Policy: same-origin
 
 # --- Caching ---------------------------------------------------------------
-# HTML is small (~110 KB) and changes when you redeploy, so cache it
-# briefly and revalidate. Assets are content that never changes under the same
-# name, so they get a year and "immutable" - which is what makes the second
+# HTML is small and changes when you redeploy, so browsers must check for a
+# newer copy on every visit (a quick "not modified" when nothing changed).
+# That way phones never keep showing an old version after a deploy.
+# Assets are content that never changes under the same name, so they get a year and "immutable" - which is what makes the second
 # visit essentially instant.
 
 /index.html
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 /rights/*
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 /privacy/*
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 /terms/*
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 /tapes/
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 /tapes/index.html
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 /tapes/f/*
   Cache-Control: public, max-age=604800
 /tapes/t/*
@@ -83,7 +84,7 @@
 /tapes/s*
   Cache-Control: public, max-age=604800
 /consent.js
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 /.well-known/gpc.json
   Content-Type: application/json
   Cache-Control: public, max-age=86400
@@ -118,7 +119,7 @@
   X-Robots-Tag: noindex, nofollow
 
 /casting/*
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
 
 /pass/*
   X-Robots-Tag: noindex, nofollow
