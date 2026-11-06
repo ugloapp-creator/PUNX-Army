@@ -148,3 +148,23 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();
+
+/* Safety net for every page: if the page's stylesheet failed to arrive (a dropped connection on a phone, or a broken copy
+   stuck in the browser's cache, which Safari sometimes keeps), ask for it once more, skipping the cache, so the site never
+   shows up as plain unstyled text. Nothing happens when the styles loaded normally. */
+(function () {
+  function heal() {
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+    for (var i = 0; i < links.length; i++) {
+      var l = links[i];
+      if (l.getAttribute('data-retried') || l.href.indexOf(location.origin + '/') !== 0) continue;
+      var ok = false; try { ok = !!(l.sheet && l.sheet.cssRules.length); } catch (e) { ok = false; } // same-origin, so an unreadable sheet means it failed
+      if (ok) continue;
+      var n = l.cloneNode(); n.setAttribute('data-retried', '1'); n.href = l.href.split('?')[0] + '?retry=' + Date.now();
+      n.onload = (function (old) { return function () { if (old.parentNode) old.parentNode.removeChild(old); }; })(l);
+      l.setAttribute('data-retried', '1'); l.parentNode.insertBefore(n, l.nextSibling);
+    }
+  }
+  if (document.readyState === 'complete') heal(); else addEventListener('load', heal);
+  setTimeout(heal, 6000);
+})();
