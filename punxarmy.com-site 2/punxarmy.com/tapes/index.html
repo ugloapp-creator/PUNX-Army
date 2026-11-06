@@ -71,6 +71,7 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
 #embed{position:relative;min-height:152px;border-radius:12px;background:var(--asphalt2);border:1px dashed #3a3a38;display:flex;align-items:center;justify-content:center;text-align:center;padding:1rem;color:var(--stone);font-size:.78rem;transition:box-shadow .3s}
 #embed.live{display:block;padding:0;border:0;background:none}
 #embed iframe{display:block;border:0;border-radius:12px}
+.tapcue{margin:0 0 .6rem;padding:.6rem .8rem;border:1px solid var(--signal);color:var(--signal);font-size:.8rem;line-height:1.45;animation:cue 1.6s ease-in-out infinite}.tapcue b{letter-spacing:.04em}@keyframes cue{50%{box-shadow:0 0 18px rgba(166,255,0,.35)}}@media (prefers-reduced-motion:reduce){.tapcue{animation:none}}
 .source.nudge #embed{box-shadow:0 0 0 2px var(--signal),0 0 30px rgba(166,255,0,.35)}
 .source .note{font-size:.72rem;color:var(--stone);margin:.45rem 0 0}
 /* ── the rack ── */
@@ -143,6 +144,7 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
     </aside>
       <div class="source" id="source">
         <p class="lab"><span>Signal source // Spotify</span><a id="sp-open" href="https://open.spotify.com/artist/5oYDSF03y6Po1oynfMgdWL" rel="noopener" target="_blank">Open in Spotify</a></p>
+        <p class="tapcue" id="tapcue" hidden><b>&#9654; Tap play on the Spotify player</b> to start the tape. On iPhone and iPad, Spotify can only start from its own button.</p>
         <div id="embed">Spotify's player appears here when you pick a tape. Nothing from Spotify loads until you move or tap on this page.</div>
         <p class="note" id="sp-note">Logged in to Spotify in this browser? You hear the whole track. If not, Spotify plays a 30-second preview.</p>
       </div>
@@ -325,6 +327,10 @@ const SP_ORIGIN = 'https://open.spotify.com';
 // actually starts once the tape is seated and PLAY goes down, like everywhere else.
 const UA = navigator.userAgent;
 const WEBKIT = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || (/Safari\//.test(UA) && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Android/.test(UA));
+// iPhone and iPad: Spotify's player only makes sound when it is started from its own play button. Asked to play from the
+// page, it reports "playing" but stays silent, and its button then shows pause. So on iOS the deck never asks Spotify to
+// play: it seats the tape and points at Spotify's button, then follows along once the song really starts.
+const IOS = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function spController(host) {
   const f = document.createElement('iframe');
   f.title = 'Spotify player'; f.width = '100%'; f.height = '152'; f.setAttribute('frameborder', '0'); f.setAttribute('allowfullscreen', '');
@@ -397,12 +403,12 @@ function activate(p) {
 }
 // a player for this tape no matter what (switching tapes or pressing play): never null
 function need(album) { return player(album) || (players.slice().forEach(drop), player(album)); }
-function warm(album, keep) { if (!busy && (!current || current.album !== album)) player(album, keep); }
+function warm(album, keep) { if (IOS) return; if (!busy && (!current || current.album !== album)) player(album, keep); }
 // Safari: unlock the warmed player inside the click; the song itself starts when the tape is seated
 let early = null;
 function startEarly(s) {
   early = null;
-  if (!WEBKIT || busy || state.tape === s.n) return;
+  if (!WEBKIT || IOS || busy || state.tape === s.n) return;
   const p = players.find((x) => x.cur() === uriOf(s.album) && x.isReady()); if (!p || p === ctrl) return;
   // keep it silent until the tape is seated: Spotify ignores a pause that arrives before it has started, so keep asking
   // the old tape's player goes first: a player Spotify has never started can't start while a removed one still counts
@@ -478,7 +484,15 @@ setInterval(() => {
     if (!ctrl || !ctrl.isReady()) spFail(); else { source.classList.add('nudge'); say('Spotify needs one more tap: press <b>PLAY</b> on the deck, or play in the Spotify strip below.'); }
   }
 }, 1000);
+const tapcue = document.getElementById('tapcue');
+function askTap() {
+  state.playing = false; press('PLAY', false); reels(false); starting = 0;
+  source.classList.add('nudge'); tapcue.hidden = false;
+  say('Tape seated. Tap <b>&#9654;</b> on the Spotify player below to start it.');
+  const r = source.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) source.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+}
 function setPlaying(on, fromSpotify) {
+  if (on) tapcue.hidden = true;
   state.playing = on; if (on) lastMove = performance.now();
   if (on) { if (!view.keys.PLAY) { if (!fromSpotify) SFX.keyDown(); else SFX.latch(); } press('PLAY', true); reels(true); if (!fromSpotify) motor(0.05); say('Playing <b>' + esc(current.title) + '</b>.'); }
   else { press('PLAY', false); reels(false); if (fromSpotify) SFX.keyUp(); }
@@ -503,6 +517,7 @@ async function insert(n) {
   spOpen.href = 'https://open.spotify.com/album/' + s.album;
   spNote.textContent = 'Logged in to Spotify in this browser? You hear the whole track. If not, Spotify plays a 30-second preview.';
   say('Loading tape ' + String(n).padStart(3, '0') + '.');
+  tapcue.hidden = true; source.classList.remove('nudge');
   const fromEarly = early && early.album === s.album; s.healed = false;
   // switching tapes: everything that has played leaves together (see purgePlayed), except the player for this tape
   const keepP = fromEarly ? early.p : players.find((x) => x.cur() === uriOf(s.album)); purgePlayed(keepP);
@@ -517,10 +532,12 @@ async function insert(n) {
   state.door = 'closed';
   await sleep(180);
   if (current !== s) return;
+  if (IOS) { askTap(); return; }
   setPlaying(true, false);
   if (fromEarly) { clearInterval(sp.holdT); sp.hold = false; fresh = false; try { sp.seek(0); } catch (e) {} spPlay(); } else spPlay();
 }
 async function eject() {
+  tapcue.hidden = true; source.classList.remove('nudge');
   if (!state.tape) { if (state.door === 'open') await closeEmpty(); else await openDoor(); say(state.door === 'open' ? 'Door open. Pick a tape.' : 'Pick a tape from the rack.'); return; }
   const n = state.tape, seq = SEQ(n);
   if (state.playing || view.keys.PLAY) { spPause(); setPlaying(false, false); }
@@ -542,7 +559,7 @@ async function run(fn) {
 }
 async function load(n) {
   audio();
-  if (state.tape === n) { if (!state.playing) { setPlaying(true, false); spPlay(); } return; }
+  if (state.tape === n) { if (!state.playing) { if (IOS) askTap(); else { setPlaying(true, false); spPlay(); } } return; }
   if (state.tape) await eject();
   await insert(n);
 }
@@ -568,6 +585,7 @@ keyBtn.PLAY.addEventListener('click', () => run(async () => {
   audio();
   if (!state.tape) { await tap('PLAY'); say('No tape in the deck. Pick one from the rack.'); return; }
   if (state.playing) return;
+  if (IOS) { await tap('PLAY'); askTap(); return; }
   if (!ctrl || !ctrl.isReady()) { say('Connecting to Spotify.'); purgePlayed(players.find((x) => x.cur() === uriOf(current.album) && x.isReady())); const c = need(current.album); activate(c); if (!c.isReady()) c.reload(); if (!(await c.whenReady(6000))) { await tap('PLAY'); spFail(); return; } fresh = true; }
   setPlaying(true, false); spPlay(); source.classList.remove('nudge');
 }));
