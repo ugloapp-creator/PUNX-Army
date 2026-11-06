@@ -71,7 +71,12 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
 #embed{position:relative;min-height:152px;border-radius:12px;background:var(--asphalt2);border:1px dashed #3a3a38;display:flex;align-items:center;justify-content:center;text-align:center;padding:1rem;color:var(--stone);font-size:.78rem;transition:box-shadow .3s}
 #embed.live{display:block;padding:0;border:0;background:none}
 #embed iframe{display:block;border:0;border-radius:12px}
-.tapcue{margin:0 0 .6rem;padding:.6rem .8rem;border:1px solid var(--signal);color:var(--signal);font-size:.8rem;line-height:1.45;animation:cue 1.6s ease-in-out infinite}.tapcue b{letter-spacing:.04em}@keyframes cue{50%{box-shadow:0 0 18px rgba(166,255,0,.35)}}@media (prefers-reduced-motion:reduce){.tapcue{animation:none}}
+.hot .playcue{position:absolute;pointer-events:none;border-radius:10px;box-shadow:0 0 0 3px var(--signal),0 0 26px 8px rgba(166,255,0,.55);animation:pc 1.1s ease-in-out infinite}
+.hot .playcue button{all:unset;pointer-events:auto;cursor:pointer;position:absolute;left:50%;bottom:calc(100% + 12px);transform:translateX(-50%);white-space:nowrap;background:var(--signal);color:#0a0a0a;font:700 .8rem/1 "IBM Plex Mono","Courier New",monospace;letter-spacing:.1em;text-transform:uppercase;padding:.55rem .75rem;border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent}
+.hot .playcue button::after{content:'';position:absolute;left:50%;top:100%;transform:translateX(-50%);border:7px solid transparent;border-top-color:var(--signal)}
+.hot .playcue[hidden]{display:none}
+@keyframes pc{50%{box-shadow:0 0 0 3px var(--signal),0 0 40px 14px rgba(166,255,0,.25)}}
+@media (prefers-reduced-motion:reduce){.hot .playcue{animation:none}}
 .source.nudge #embed{box-shadow:0 0 0 2px var(--signal),0 0 30px rgba(166,255,0,.35)}
 .source .note{font-size:.72rem;color:var(--stone);margin:.45rem 0 0}
 /* ── the rack ── */
@@ -144,7 +149,6 @@ body{background-image:radial-gradient(ellipse 70% 45% at 30% 30%,rgba(215,25,32,
     </aside>
       <div class="source" id="source">
         <p class="lab"><span>Signal source // Spotify</span><a id="sp-open" href="https://open.spotify.com/artist/5oYDSF03y6Po1oynfMgdWL" rel="noopener" target="_blank">Open in Spotify</a></p>
-        <p class="tapcue" id="tapcue" hidden><b>&#9654; Tap play on the Spotify player</b> to start the tape. On iPhone and iPad, Spotify can only start from its own button.</p>
         <div id="embed">Spotify's player appears here when you pick a tape. Nothing from Spotify loads until you move or tap on this page.</div>
         <p class="note" id="sp-note">Logged in to Spotify in this browser? You hear the whole track. If not, Spotify plays a 30-second preview.</p>
       </div>
@@ -328,8 +332,8 @@ const SP_ORIGIN = 'https://open.spotify.com';
 const UA = navigator.userAgent;
 const WEBKIT = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || (/Safari\//.test(UA) && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Android/.test(UA));
 // iPhone and iPad: Spotify's player only makes sound when it is started from its own play button. Asked to play from the
-// page, it reports "playing" but stays silent, and its button then shows pause. So on iOS the deck never asks Spotify to
-// play: it seats the tape and points at Spotify's button, then follows along once the song really starts.
+// page a few seconds after a tap, it reports "playing" but stays silent. A tap on the deck's own PLAY key does count, so on
+// iOS the tape seats silently, the PLAY key lights up with a "tap play" label, and that tap starts Spotify directly.
 const IOS = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function spController(host) {
   const f = document.createElement('iframe');
@@ -484,12 +488,16 @@ setInterval(() => {
     if (!ctrl || !ctrl.isReady()) spFail(); else { source.classList.add('nudge'); say('Spotify needs one more tap: press <b>PLAY</b> on the deck, or play in the Spotify strip below.'); }
   }
 }, 1000);
-const tapcue = document.getElementById('tapcue');
+// iPhone/iPad: a glowing ring on the PLAY key with a "tap play" label above it (the label is a button too)
+const tapcue = document.createElement('div'); tapcue.className = 'playcue'; tapcue.hidden = true;
+const cueBtn = document.createElement('button'); cueBtn.type = 'button'; cueBtn.textContent = '\u25B6 Tap play'; cueBtn.setAttribute('aria-label', 'Play the tape');
+cueBtn.addEventListener('click', () => keyBtn.PLAY.click()); tapcue.appendChild(cueBtn);
 function askTap() {
-  state.playing = false; press('PLAY', false); reels(false); starting = 0;
-  source.classList.add('nudge'); tapcue.hidden = false;
-  say('Tape seated. Tap <b>&#9654;</b> on the Spotify player below to start it.');
-  const r = source.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) source.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  state.playing = false; press('PLAY', false); reels(false); starting = 0; source.classList.remove('nudge');
+  if (!tapcue.parentNode) { placeBtn(tapcue, MF.keys.PLAY.hit); hot.appendChild(tapcue); }
+  tapcue.hidden = false;
+  say('Tape in. Tap <b>PLAY</b> on the deck to start it.');
+  const r = keyBtn.PLAY.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 10) $('#frame').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
 }
 function setPlaying(on, fromSpotify) {
   if (on) tapcue.hidden = true;
@@ -585,7 +593,6 @@ keyBtn.PLAY.addEventListener('click', () => run(async () => {
   audio();
   if (!state.tape) { await tap('PLAY'); say('No tape in the deck. Pick one from the rack.'); return; }
   if (state.playing) return;
-  if (IOS) { await tap('PLAY'); askTap(); return; }
   if (!ctrl || !ctrl.isReady()) { say('Connecting to Spotify.'); purgePlayed(players.find((x) => x.cur() === uriOf(current.album) && x.isReady())); const c = need(current.album); activate(c); if (!c.isReady()) c.reload(); if (!(await c.whenReady(6000))) { await tap('PLAY'); spFail(); return; } fresh = true; }
   setPlaying(true, false); spPlay(); source.classList.remove('nudge');
 }));
